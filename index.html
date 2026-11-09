@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="pt-PT"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>GYM RPG v3.9</title>
-<script>/* Login com Google (opcional): cola aqui o Client ID OAuth, ou preenche-o dentro do jogo em Dados. */window.GYM_CLOUD={clientId:'SEU-CLIENT-ID.apps.googleusercontent.com'};</script>
+<title>GYM RPG v3.10</title>
+<script>/* Login com Google (opcional): cola aqui o Client ID OAuth, ou preenche-o dentro do jogo em Dados. */window.GYM_CLOUD={clientId:'114168499507-k34ql5rbtp84toedtj87at8jrobjim6j.apps.googleusercontent.com'};</script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com/3.4.17"></script>
@@ -87,7 +87,7 @@ function PBU(pb,name,w,r,d){if(!PD.includes(d))return;const n=nz(name),u=(k,v,mx
 function S(){
  const b={sup:0,agach:0,dead:0,hip:0},h={sup:{},agach:{},dead:{},hip:{}},W={},M={},Y={},pb={};let vol=0,mv=0,ms=0;const Z={sup:{},agach:{},dead:{},hip:{}},QW={},rc={};
  D.ss.forEach(s=>{let v=0,n=0;
-  s.ex.forEach(e=>{const k=mk(e.n),c=cd(e.n);e.s.forEach(([w,r])=>{n++;if(c)return;v+=w*r;if(k){const o=rm(w,r);b[k]=Math.max(b[k],o);h[k][s.d]=Math.max(h[k][s.d]||0,o)}if(k&&r<=10){const kg=+s.kg||+D.p.kg||98,o2=rm(w,r);if(o2<=6*kg)Z[k][s.d]=Math.max(Z[k][s.d]||0,o2/kg)}})});
+  s.ex.forEach(e=>{const k=mk(e.n),c=cd(e.n);e.s.forEach(([w,r])=>{n++;if(c)return;v+=w*r;if(k){const o=rm(w,r);b[k]=Math.max(b[k],o);h[k][s.d]=Math.max(h[k][s.d]||0,o)}if(k&&r<=10){const kg=swt(s)||98,o2=rm(w,r);if(o2<=6*kg)Z[k][s.d]=Math.max(Z[k][s.d]||0,o2/kg)}})});
   vol+=v;mv=Math.max(mv,v);ms=Math.max(ms,n);
   const wk=wkn(dnum(s.d)),mo=+s.d.slice(0,4)*12+ +s.d.slice(5,7);
   W[wk]=(W[wk]||0)+1;M[mo]=(M[mo]||0)+1;(Y[wk]=Y[wk]||new Set).add(s.day)});
@@ -98,7 +98,7 @@ function S(){
  Object.keys(byD).sort().forEach(d=>{const n=dnum(d),ok=isFinite(n);let st=0;
   if(ok){if(last!=null){const a=atrof(n-last);if(a)LOG.push({...a,d});cn=n-last>STK_GAP?1:cn+1}else cn=1;st=cn>=STK_META?cn:0}
   const m=st>=1?STK_MULT:1;
-  byD[d].forEach(s=>{const v=s.ex.reduce((a,e)=>a+volE(e,s.kg),0);let pr=0;s.ex.forEach(e=>{const k=mk(e.n);if(!k)return;const o=Math.max(...e.s.map(([w,r])=>r<=10?rm(w,r):0));if(rc[k]&&o>rc[k]*1.0001)pr=1;rc[k]=Math.max(rc[k]||0,o)});const g=Math.round(s.ex.reduce((a,e)=>a+xpE(e,s.kg),0)*(pr?1.05:1)*m);xp+=g;if(rec>0){const q=Math.min(rec,g*.5);xp+=q;rec-=q}const qk=wkn(n),Q=QW[qk]=QW[qk]||{f:new Set,p:0,d:0};if(['Dia1','Dia2','Dia3','Dia4'].includes(s.day))Q.f.add(s.day);if(pr)Q.p=1;if(s.day=='Dia 3.1')Q.d=1;sx.set(s,{v,b:v/XP_DIV,m,x:g,st,pr});s.ex.forEach(e=>e.s.forEach(([w2,r])=>PBU(pb,e.n,w2,r,s.day)))});
+  byD[d].forEach(s=>{const v=s.ex.reduce((a,e)=>a+volE(e,swt(s)),0);let pr=0;s.ex.forEach(e=>{const k=mk(e.n);if(!k)return;const o=Math.max(...e.s.map(([w,r])=>r<=10?rm(w,r):0));if(rc[k]&&o>rc[k]*1.0001)pr=1;rc[k]=Math.max(rc[k]||0,o)});const g=Math.round(s.ex.reduce((a,e)=>a+xpE(e,swt(s)),0)*(pr?1.05:1)*m);xp+=g;if(rec>0){const q=Math.min(rec,g*.5);xp+=q;rec-=q}const qk=wkn(n),Q=QW[qk]=QW[qk]||{f:new Set,p:0,d:0};if(['Dia1','Dia2','Dia3','Dia4'].includes(s.day))Q.f.add(s.day);if(pr)Q.p=1;if(s.day=='Dia 3.1')Q.d=1;sx.set(s,{v,b:v/XP_DIV,m,x:g,st,pr});s.ex.forEach(e=>e.s.forEach(([w2,r])=>PBU(pb,e.n,w2,r,s.day)))});
   const pv=PV.reduce((a,x)=>a+(pb[x.id]?TIERS.filter(q=>pf(x,pb[x.id])>=q).reduce((z,q)=>z+TXP[q],0):0),0);xp+=pv-prov;prov=pv;
   if(ok)last=n});
  let qx=0;Object.values(QW).forEach(q=>{qx+=(q.f.size>=3?150:0)+(q.p?150:0)+(q.d?100:0)});xp+=qx;const T=dnum(td()),gl=last==null?null:T-last,atr=last==null?null:atrof(gl);
@@ -214,7 +214,7 @@ function vStk(s){const T=dnum(td()),m0=wkn(T)*7-3,set=new Set(D.ss.map(x=>dnum(x
 function vH0(){const s=S(),p=D.p,ne=RK2.find(x=>x[0]>s.lv),mx=s.lv>=XM,cur=CXP(s.lv),nx=mx?cur:CXP(s.lv+1),pc=mx?100:Math.min(100,(s.xp-cur)/(nx-cur)*100);
  const rk=stg(s.lv),r0=CXP(rk[0]),r1=ne?CXP(ne[0]):0,pr=ne?Math.min(100,Math.max(0,(s.xp-r0)/(r1-r0)*100)):100;
  const inf=p.kg?`${fm(p.kg)} kg${p.age?' · '+fm(p.age)+' anos':''} · ${fm(p.cm)} cm ✎`:'Definir perfil ✎';
- return`<div class="flex items-start justify-between gap-3"><div><h1 class="text-2xl font-bold text-[#39ff88]" style="text-shadow:0 0 14px #39ff8899">GYM RPG <span class="text-xs text-zinc-400 align-middle">v3.9</span></h1><div class="text-xs text-zinc-400">O Despertar do Titã</div></div><button class="text-right leading-tight" onclick="pe=!pe;R()"><div class="text-xs text-zinc-400">${inf}</div><div class="text-xs mt-1 font-semibold text-[#39ff88]/80">${s.t} · Nv ${s.lv}</div></button></div>
+ return`<div class="flex items-start justify-between gap-3"><div><h1 class="text-2xl font-bold text-[#39ff88]" style="text-shadow:0 0 14px #39ff8899">GYM RPG <span class="text-xs text-zinc-400 align-middle">v3.10</span></h1><div class="text-xs text-zinc-400">O Despertar do Titã</div></div><button class="text-right leading-tight" onclick="pe=!pe;R()"><div class="text-xs text-zinc-400">${inf}</div><div class="text-xs mt-1 font-semibold text-[#39ff88]/80">${s.t} · Nv ${s.lv}</div></button></div>
  ${pe||!p.kg?`<div class="c"><div class="grid grid-cols-3 gap-2 text-xs">${[['kg','Peso (kg)',p.kg],['cm','Altura (cm)',p.cm],['ag','Idade',p.age]].map(([k,n,v])=>`<label>${n}<input id="${k}" class="i mt-1" inputmode="decimal" value="${v?fm(v):''}"></label>`).join('')}</div><button class="b w-full mt-3" onclick="sp()">Guardar perfil</button></div>`:''}
  ${vStk(s)}${vMiss(s)}
  <div class="c text-center"><div class="flex items-end justify-between"><div class="text-left"><div class="text-xs text-zinc-400">Nível</div><div class="text-4xl font-bold text-[#39ff88]" style="text-shadow:0 0 16px #39ff8899">${s.lv}</div></div><div class="text-right"><div class="text-xs text-zinc-400">Rank · Fase ${fase(s.lv)}/10</div><div class="font-semibold">${s.t}</div></div></div>
@@ -229,7 +229,7 @@ function vH0(){const s=S(),p=D.p,ne=RK2.find(x=>x[0]>s.lv),mx=s.lv>=XM,cur=CXP(s
  </div></div>
  <div class="grid grid-cols-2 gap-2">${Object.keys(L).map((k,i)=>`<div class="c"><div class="text-xl">${IC[i]}</div><div class="text-xs text-zinc-400">${L[k]} · 1RM</div><div class="text-2xl font-bold text-[#39ff88]">${s.b[k]?fm(s.b[k]):'—'}<span class="text-sm"> kg</span></div></div>`).join('')}</div>
  <p class="text-xs text-zinc-500">XP por treino = Σ(Peso × Repetições) ÷ 10. Nas barras, flexões e abdominais o Peso é o teu peso corporal + lastro; o cardio não tem volume. 🔥 Streak: ${STK_META} dias de treino seguidos, com no máximo ${STK_GAP-1} dias de pausa; com o streak ativo cada treino vale +5% XP. Atrofia: depois de ${ATR_DIAS} dias sem treinar perdes 0,5% do XP por cada dia a mais (máx. 25%) e podes descer de nível, rank e fase. Nível = 85% força relativa (1RM dos 4 levantamentos ÷ peso corporal, últimos 90 dias) + 15% dedicação (XP de volume).</p>`}
-function sp(){let kg=pn($('#kg').value),cm=pn($('#cm').value);if(cm&&cm<3)cm*=100;if(kg<30||kg>300||cm<100||cm>250)return toast('Verifica o peso (kg) e a altura (cm).');D.p={kg,cm,age:pn($('#ag').value)};save();pe=0;R();toast('Perfil guardado')}
+function sp(){let kg=pn($('#kg').value),cm=pn($('#cm').value);if(cm&&cm<3)cm*=100;if(kg<30||kg>300||cm<100||cm>250)return toast('Verifica o peso (kg) e a altura (cm).');wInit();const k0=+D.p.kg;D.p={kg,cm,age:pn($('#ag').value)};if(kg!==k0)wSet(td(),kg);save();pe=0;R();toast('Perfil guardado')}
 
 function last(n){const z=nz(n),c=cd(n);for(let j=D.ss.length-1;j>=0;j--){const s=D.ss[j],e=s.ex.find(x=>nz(x.n)==z);if(e){const[w,r]=c?e.s[0]:e.s.reduce((a,c)=>rm(...c)>rm(...a)?c:a),df=(Date.now()-Date.parse(s.d))/864e5;return`${df>=5&&df<=9?'Semana passada':'Última sessão ('+fd(s.d)+')'}: ${c?c[2](w,r):`${fm(w)}kg × ${r} reps`}`}}return''}
 function vT(){const dr=draft[day]=draft[day]||{};
@@ -260,7 +260,7 @@ function addx(){const n=$('#nx').value.trim();if(!n)return;(D.cx[day]=D.cx[day]|
 function fin(){const dr=draft[day]||{},ex=[];
  EX(day).forEach(n=>{const s=(dr[n]||[]).map(([w,r])=>[pn(w),Math.round(pn(r))]).filter(([w,r])=>r>0);if(s.length)ex.push({n,s})});
  if(!ex.length)return toast('Introduz pelo menos uma série com reps.');
- const s0=S(),ns={d:$('#dt').value||td(),day,ex,kg:+D.p.kg||0};D.ss.push(ns);srt();
+ const s0=S(),ns={d:$('#dt').value||td(),day,ex,kg:wAt($('#dt').value||td())||+D.p.kg||0};D.ss.push(ns);srt();
  const nw=chk(),s1=S(),g=s1.sx.get(ns);delete draft[day];dv='';sd();
  if(!g){save();R();return toast('Esse treino já estava registado.')}
  toast(`Treino guardado! Volume ${fx(g.v)} kg → +${fx(g.x)} XP${g.m>1?' (🔥 +5% streak)':''}`);if(g.pr)toast('🏅 Novo recorde! +5% de XP neste treino');
@@ -289,12 +289,12 @@ const vD0=()=>`<div class="c space-y-2"><b class="text-[#39ff88]">Backup e impor
  <input type="file" accept=".json,.csv,.txt" class="text-xs" onchange="fl(this)"></div>
  ${vAI()}<button class="g w-full text-red-300 mt-3" onclick="rz()">Apagar todos os dados</button>`;
 const out=t=>{$('#io').value=t;$('#io').select()};
-const xj=()=>out(JSON.stringify({v:6,p:D.p,ss:D.ss,cx:D.cx,pm:D.pm,px:D.px}));
+const xj=()=>out(JSON.stringify({v:6,p:D.p,ss:D.ss,cx:D.cx,pm:D.pm,px:D.px,wh:D.wh}));
 const xc=()=>out('data;dia;exercicio;peso;reps\n'+D.ss.flatMap(s=>s.ex.flatMap(e=>e.s.map(([w,r])=>[s.d,s.day,e.n,fm(w),r].join(';')))).join('\n'));
 const cp=()=>{const t=$('#io');t.select();try{navigator.clipboard.writeText(t.value).catch(()=>document.execCommand('copy'))}catch(e){document.execCommand('copy')}toast('Copiado')};
 const fl=i=>{const r=new FileReader();r.onload=()=>imp(r.result);r.readAsText(i.files[0])};
 function imp(t){t=t.trim();const n0=D.ss.length;
- try{if(t[0]=='{'){const o=JSON.parse(t);if(!Array.isArray(o.ss))throw 0;D.ss=D.ss.concat(o.ss);if(o.p&&!D.p.kg)D.p=o.p;if(o.pm&&!D.pm)D.pm=o.pm;if(o.px&&!D.px)D.px=o.px;Object.entries(o.cx||{}).forEach(([k,v])=>D.cx[k]=[...new Set([...(D.cx[k]||[]),...v])])}
+ try{if(t[0]=='{'){const o=JSON.parse(t);if(!Array.isArray(o.ss))throw 0;D.ss=D.ss.concat(o.ss);if(o.p&&!D.p.kg)D.p=o.p;if(o.wh)D.wh=mergeWh(D.wh,o.wh);if(o.pm&&!D.pm)D.pm=o.pm;if(o.px&&!D.px)D.px=o.px;Object.entries(o.cx||{}).forEach(([k,v])=>D.cx[k]=[...new Set([...(D.cx[k]||[]),...v])])}
  else{const rows=t.split(/\r?\n/).filter(Boolean),dl=rows[0].includes(';')?';':',',g={};
   rows.forEach(r=>{const c=r.split(dl).map(x=>x.trim());if(!/^\d/.test(c[0]))return;let d=c[0];
    if(d.includes('/')){const[a,b,y]=d.split('/');d=`${y.length==2?'20'+y:y}-${b.padStart(2,'0')}-${a.padStart(2,'0')}`}
@@ -349,14 +349,14 @@ let hf='',hdi=-1;
 const WD=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
 const fmt=(e,z)=>{const c=cd(e.n);return c?c[2](z[0],z[1]):`${fm(z[0])} kg × ${z[1]}`};
 const csvT=()=>'data;dia;exercicio;peso;reps\n'+D.ss.flatMap(s=>s.ex.flatMap(e=>e.s.map(([w,r])=>[s.d,s.day,e.n,fm(w),r].join(';')))).join('\n');
-const jsonT=()=>JSON.stringify({v:6,p:D.p,ss:D.ss,cx:D.cx,pm:D.pm,px:D.px},null,1);
+const jsonT=()=>JSON.stringify({v:6,p:D.p,ss:D.ss,cx:D.cx,pm:D.pm,px:D.px,wh:D.wh},null,1);
 function dlf(n,t,m){try{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([t],{type:m+';charset=utf-8'}));a.download=n;document.body.append(a);a.click();a.remove();D.bk=Date.now();save();toast('Ficheiro '+n+' gerado')}catch(e){toast('Não deu para descarregar. Usa Dados → Exportar.')}}
 function hDel(i,b){if(hdi!=i){hdi=i;b.textContent='Toca outra vez para apagar';return}D.ss.splice(i,1);hdi=-1;D.lv=S().lv;save();toast('Treino apagado');R()}
-function vX(){const s=S(),T=dnum(td()),tv=D.ss.reduce((a,x)=>a+x.ex.reduce((b,e)=>b+volE(e),0),0),L=D.ss.map((x,i)=>[x,i]).filter(([x])=>!hf||x.day==hf).reverse();
+function vX(){const s=S(),T=dnum(td()),tv=D.ss.reduce((a,x)=>a+x.ex.reduce((b,e)=>b+volE(e,swt(x)),0),0),L=D.ss.map((x,i)=>[x,i]).filter(([x])=>!hf||x.day==hf).reverse();
  return`<div class="c"><b class="text-[#39ff88]">Treinos registados</b><div class="text-xs text-zinc-400 mt-1">${D.ss.length} treinos · volume total ${fx(tv)} kg${s.lastD?` · último ${fd(s.lastD)} (${quando(T-dnum(s.lastD))})`:''}</div>
  <div class="flex gap-2 mt-3 flex-wrap"><button class="g text-sm" onclick="dlf('treinos-gym-rpg.csv',csvT(),'text/csv')">⬇ Descarregar CSV</button><button class="g text-sm" onclick="dlf('treinos-gym-rpg.json',jsonT(),'application/json')">⬇ Descarregar JSON</button></div></div>
  <div class="grid grid-cols-3 gap-1">${['',...DN].map(d=>`<button onclick="hf='${d}';R()" class="rounded-lg text-xs whitespace-nowrap ${d==hf?'b':'g'}" style="padding:9px 2px">${d||'Todos'}</button>`).join('')}</div>`
- +(L.length?L.map(([x,i])=>{const q=s.sx.get(x),v=x.ex.reduce((a,e)=>a+volE(e),0);
+ +(L.length?L.map(([x,i])=>{const q=s.sx.get(x),v=x.ex.reduce((a,e)=>a+volE(e,swt(x)),0);
   return`<details class="c"><summary class="cursor-pointer"><b class="text-[#39ff88]">${esc(x.day)}</b> <span class="text-zinc-400 text-sm">· ${fd(x.d)} (${WD[new Date(x.d+'T12:00').getDay()]||''})</span><div class="text-xs text-zinc-400 mt-1">${x.ex.length} exercícios · ${fx(v)} kg${q?` · +${fx(q.x)} XP`:''}</div></summary>
   ${x.ex.map(e=>`<div class="mt-3 text-sm"><b>${esc(e.n)}</b><div class="text-xs text-zinc-300">${e.s.map(z=>esc(fmt(e,z))).join(' · ')}</div></div>`).join('')}
   <button class="g w-full text-sm mt-4 text-red-300" onclick="hDel(${i},this)">Apagar treino</button></details>`}).join(''):'<div class="c text-sm text-zinc-500">Sem treinos registados neste filtro.</div>')}
@@ -372,11 +372,11 @@ function vMiss(s){const q=s.qw||{f:new Set,p:0,d:0},M=[['3 treinos de força (Di
  return`<div class="c text-sm"><div class="text-xs text-zinc-400">💪 Força relativa <b class="text-[#39ff88]">${Math.round(s.fs*100)}%</b> · Dedicação <b class="text-[#39ff88]">${fx(s.xpd)} XP</b> · nível = 85% força + 15% dedicação</div><b class="text-[#39ff88] block mt-3">🎯 Missões da semana</b>${M.map(([n,ok,p,x])=>`<div class="flex justify-between mt-1 ${ok?'text-[#7dffb3]':'text-zinc-300'}"><span>${ok?'✅':'⬜'} ${n}</span><span class="text-xs">${p} · +${x} XP</span></div>`).join('')}</div>`}
 function vEv(){const T=dnum(td()),m0=wkn(T)*7-3,days=new Set(D.ss.map(x=>dnum(x.d))),vb=[];let cal='<div class="flex gap-1">';
  for(let w=11;w>=0;w--){const b=m0-w*7;let col='<div class="flex flex-col gap-1">';for(let i=0;i<7;i++){const n=b+i;col+=`<div style="width:18px;height:18px;border-radius:4px;background:${n>T?'transparent':days.has(n)?'#39ff88':'rgba(255,255,255,.08)'}"></div>`}
-  vb.push(D.ss.filter(x=>{const n=dnum(x.d);return n>=b&&n<b+7}).reduce((a,x)=>a+x.ex.reduce((c,e)=>c+volE(e,x.kg),0),0));cal+=col+'</div>'}
+  vb.push(D.ss.filter(x=>{const n=dnum(x.d);return n>=b&&n<b+7}).reduce((a,x)=>a+x.ex.reduce((c,e)=>c+volE(e,swt(x)),0),0));cal+=col+'</div>'}
  cal+='</div>';const mx=Math.max(1,...vb),pts=D.ss.filter(x=>+x.kg).map(x=>[dnum(x.d),+x.kg]);
  let pw='<p class="text-xs text-zinc-500">Precisas de treinos com peso corporal guardado (os novos treinos guardam-no sozinhos).</p>';
  if(pts.length>=2){const a=Math.min(...pts.map(p=>p[1]))-1,b=Math.max(...pts.map(p=>p[1]))+1,x0=pts[0][0],x1=Math.max(pts[pts.length-1][0],x0+1);pw=`<svg viewBox="0 0 300 100" class="w-full"><polyline fill="none" stroke="#39ff88" stroke-width="2" points="${pts.map(p=>`${((p[0]-x0)/(x1-x0)*290+5).toFixed(1)},${(95-(p[1]-a)/(b-a)*90).toFixed(1)}`).join(' ')}"/></svg><div class="text-xs text-zinc-400">${fm(pts[0][1])} → ${fm(pts[pts.length-1][1])} kg</div>`}
- return`<div class="c"><div class="text-sm text-zinc-400 mb-2">Calendário · últimas 12 semanas (colunas = semanas, linhas = Seg→Dom)</div><div class="overflow-x-auto">${cal}</div></div><div class="c"><div class="text-sm text-zinc-400 mb-2">Volume por semana (kg)</div><div class="flex items-end gap-1" style="height:90px">${vb.map(v=>`<div class="flex-1 rounded-t" style="height:${Math.max(2,v/mx*100)}%;background:#39ff88"></div>`).join('')}</div><div class="text-xs text-zinc-500 mt-1">Máx.: ${fx(mx)} kg</div></div><div class="c"><div class="text-sm text-zinc-400 mb-2">Peso corporal</div>${pw}</div>`}
+ return`<div class="c"><div class="text-sm text-zinc-400 mb-2">Calendário · últimas 12 semanas (colunas = semanas, linhas = Seg→Dom)</div><div class="overflow-x-auto">${cal}</div></div><div class="c"><div class="text-sm text-zinc-400 mb-2">Volume por semana (kg)</div><div class="flex items-end gap-1" style="height:90px">${vb.map(v=>`<div class="flex-1 rounded-t" style="height:${Math.max(2,v/mx*100)}%;background:#39ff88"></div>`).join('')}</div><div class="text-xs text-zinc-500 mt-1">Máx.: ${fx(mx)} kg</div></div>${vPeso()}`}
 const vG=()=>vG0()+vEv();
 
 /* ===== v3.9 · Login com Google: os dados ficam guardados na tua conta Google (Drive, pasta privada da app) ===== */
@@ -386,7 +386,7 @@ const GC=(()=>{try{return JSON.parse(lsg('gymrpg-g-cfg'))||{}}catch(e){return{}}
 function dh(){return JSON.stringify(D,(k,v)=>k=='ts'||k=='al'||k=='lv'||k=='bk'?undefined:v)}
 function saveLocal(){lss(KEY,JSON.stringify(D))}
 function setSt(st,msg){CL.st=st;CL.msg=msg||'';if(V=='d'||V=='h')R()}
-function replaceD(o){Object.keys(D).forEach(k=>delete D[k]);Object.assign(D,{p:{},ss:[],cx:{},u:{}},o);srt();CL.h=dh();saveLocal()}
+function replaceD(o){Object.keys(D).forEach(k=>delete D[k]);Object.assign(D,{p:{},ss:[],cx:{},u:{}},o);srt();wInit();CL.h=dh();saveLocal()}
 function mergeSS(a,b){const k=s=>s.d+'|'+s.day,h=new Set(a.map(k));return a.concat(b.filter(s=>!h.has(k(s))))}
 function applyRemote(rd,why){if(!(rd.ss||[]).length&&D.ss.length){CL.dirty=true;return}lss('gymrpg-backup-sync',JSON.stringify(D));replaceD(rd);chk();toast('☁️ '+why);if(V!='t'){R();onOpen()}}
 const EXP='Sessão Google expirada: toca em Reconectar.';
@@ -394,7 +394,7 @@ async function gapi(u,o){if(!CL.tok||Date.now()>CL.exp){CL.tok='';setSt('expired
 async function gFind(){const r=await gapi(GA+'drive/v3/files?spaces=appDataFolder&orderBy=createdTime&pageSize=5&fields=files(id,modifiedTime)&q='+encodeURIComponent("name='gymrpg.json'")),f=(await r.json()).files||[];return f[0]||null}
 async function cloudPull(){const f=await gFind(),lk='gymrpg-linked-'+(CL.email||'g');if(!f){CL.dirty=D.ss.length>0;lss(lk,'1');return}CL.fid=f.id;const rd=await(await gapi(GA+'drive/v3/files/'+f.id+'?alt=media')).json();CL.mt=f.modifiedTime;
  const rt=rd.ts||0,lt=D.ts||0,first=!lsg(lk),b=+lsg('gymrpg-base')||0,rn=(rd.ss||[]).length;
- const merge=()=>{const L=JSON.parse(JSON.stringify(D));replaceD({...rd,...(lt>rt?{p:L.p,px:L.px,pm:L.pm,cx:L.cx,u:L.u}:{}),ss:mergeSS(rd.ss||[],L.ss)});D.ts=Date.now();saveLocal();CL.dirty=true;toast('☁️ Treinos deste dispositivo e da tua conta Google juntos')};
+ const merge=()=>{const L=JSON.parse(JSON.stringify(D));replaceD({...rd,...(lt>rt?{p:L.p,px:L.px,pm:L.pm,cx:L.cx,u:L.u}:{}),ss:mergeSS(rd.ss||[],L.ss),wh:mergeWh(rd.wh,L.wh)});D.ts=Date.now();saveLocal();CL.dirty=true;toast('☁️ Treinos deste dispositivo e da tua conta Google juntos')};
  if(!rn&&D.ss.length)CL.dirty=true;
  else if(first&&D.ss.length&&rn)merge();
  else if(first)applyRemote(rd,'Dados recebidos da tua conta Google');
@@ -431,10 +431,31 @@ const hasBk=()=>!!lsg('gymrpg-backup-sync');
 function restoreBk(){try{const b=JSON.parse(lsg('gymrpg-backup-sync'));if(!b)return;replaceD(b);D.ts=Date.now();save();toast('Dados anteriores restaurados');R()}catch(e){toast('Não foi possível restaurar.')}}
 const vD=()=>vCloud()+vD0();
 
+/* ===== v3.10 · Histórico de peso: cada alteração fica registada e os treinos antigos usam o peso que tinhas na altura ===== */
+function wInit(){if(!Array.isArray(D.wh))D.wh=[];if(!D.wh.length&&+D.p.kg>0){const d=D.ss.length?D.ss.map(x=>x.d).filter(Boolean).sort()[0]:td();D.wh.push({d,kg:+D.p.kg})}}
+function wAt(d){const h=(D.wh||[]).filter(x=>+x.kg>0).sort((a,b)=>a.d<b.d?-1:1);let v=null;h.forEach(x=>{if(x.d<=d)v=+x.kg});return v!=null?v:(h[0]?+h[0].kg:(+D.p.kg||0))}
+function swt(s){return +s.kg>0?+s.kg:wAt(s.d)}
+function wCur(){const h=(D.wh||[]).filter(x=>x.d<=td()&&+x.kg>0).sort((a,b)=>a.d<b.d?-1:1);if(h.length)D.p.kg=+h[h.length-1].kg}
+function mergeWh(a,b){const m={};(a||[]).concat(b||[]).forEach(x=>{if(x&&x.d&&+x.kg>0)m[x.d]={d:x.d,kg:+x.kg}});return Object.values(m).sort((p,q)=>p.d<q.d?-1:1)}
+function wSet(d,kg){wInit();D.wh=mergeWh(D.wh.filter(x=>x.d!==d),[{d,kg:Math.round(kg*10)/10}]);wCur()}
+function wDel(d){if(D.wh.length<=1)return toast('Tem de ficar pelo menos um registo.');if(!confirm('Apagar o registo de peso de '+fd(d)+'?'))return;D.wh=D.wh.filter(x=>x.d!==d);wCur();save();R()}
+function wAdd(){const kg=pn(($('#wk')||{}).value),d=/^\d{4}-\d{2}-\d{2}$/.test(($('#wdt')||{}).value||'')?$('#wdt').value:td();if(!(kg>=30&&kg<=300))return toast('Verifica o peso (30 a 300 kg).');wSet(d,kg);save();R();toast('Peso registado')}
+var WP=null;const f2=v=>(+v).toFixed(2).replace('.',',');
+function wpick(ev){const sv=$('#wsvg');if(!WP||!sv)return;const r=sv.getBoundingClientRect(),x=(ev.clientX-r.left)/r.width*320;let b=0,bd=1e9;WP.forEach((p,i)=>{const d=Math.abs(p[0]-x);if(d<bd){bd=d;b=i}});const p=WP[b];$('#wl').setAttribute('x1',p[0]);$('#wl').setAttribute('x2',p[0]);$('#wc').setAttribute('cx',p[0]);$('#wc').setAttribute('cy',p[1]);$('#wv').textContent=f2(p[2].kg);$('#wd').textContent=fd(p[2].d)}
+function vPeso(){wInit();const h=D.wh.filter(x=>+x.kg>0).slice().sort((a,b)=>a.d<b.d?-1:1);if(!h.length)return'';
+ const W=320,H=150,pl=8,pr=34,pt=14,pb=18,n=h.length,t0=dnum(h[0].d),t1=Math.max(dnum(h[n-1].d),t0+1),vs=h.map(x=>+x.kg),lo0=Math.min(...vs),hi0=Math.max(...vs),pad=Math.max(1,(hi0-lo0)*.25),lo=lo0-pad,hi=hi0+pad,X=d=>pl+(dnum(d)-t0)/(t1-t0)*(W-pl-pr),Y=v=>pt+(hi-v)/(hi-lo)*(H-pt-pb),P=h.map(x=>[+X(x.d).toFixed(1),+Y(+x.kg).toFixed(1),x]);WP=P;
+ const ln=P.map((p,i)=>(i?'L':'M')+p[0]+' '+p[1]).join(' '),ar=ln+` L${P[n-1][0]} ${H-pb} L${P[0][0]} ${H-pb} Z`,tk=[0,1,2,3].map(i=>{const v=hi-(hi-lo)*i/3,y=Y(v).toFixed(1);return`<line x1="${pl}" x2="${W-pl-pr+pl}" y1="${y}" y2="${y}" stroke="rgba(255,255,255,.08)"/><text x="${W-pr+4}" y="${+y+3}" font-size="9" fill="#8aa396">${v.toFixed(1).replace('.',',')}</text>`}).join(''),l=P[n-1];
+ const rows=h.slice().reverse().map((x,i,a)=>{const q=a[i+1],df=q?Math.round((+x.kg-+q.kg)*10)/10:0;return`<div class="flex justify-between items-center text-sm py-1 border-t border-white/10"><span>${fd(x.d)}</span><span><b>${fm(+x.kg)} kg</b> <span class="text-xs ${df>0?'text-red-300':df<0?'text-[#7dffb3]':'text-zinc-500'}">${q?(df>0?'+':df<0?'−':'')+fm(Math.abs(df))+' kg':'início'}</span><button class="text-zinc-500 px-2" onclick="wDel('${x.d}')">✕</button></span></div>`}).join('');
+ return`<div class="c"><div class="text-sm text-zinc-400">⚖️ Peso corporal</div><div class="text-center mt-1"><span id="wv" class="text-4xl font-semibold text-[#e8fff1]">${f2(h[n-1].kg)}</span> <span class="text-sm text-zinc-400">kg</span></div><div id="wd" class="text-center text-xs text-zinc-400 mb-1">${fd(h[n-1].d)}</div>
+ <svg id="wsvg" viewBox="0 0 ${W} ${H}" class="w-full select-none" style="touch-action:pan-y" onpointerdown="wpick(event)" onpointermove="if(event.buttons||event.pointerType=='touch')wpick(event)"><defs><linearGradient id="wg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#39ff88" stop-opacity=".35"/><stop offset="1" stop-color="#39ff88" stop-opacity="0"/></linearGradient></defs>${tk}<path d="${ar}" fill="url(#wg)"/><path d="${ln}" fill="none" stroke="#39ff88" stroke-width="2" stroke-linejoin="round"/>${P.map(p=>`<circle cx="${p[0]}" cy="${p[1]}" r="2.5" fill="#39ff88"/>`).join('')}<line id="wl" x1="${l[0]}" x2="${l[0]}" y1="${pt}" y2="${H-pb}" stroke="#b6ffd4" stroke-dasharray="3 3"/><circle id="wc" cx="${l[0]}" cy="${l[1]}" r="5" fill="#061a10" stroke="#39ff88" stroke-width="2"/><text x="${pl}" y="${H-4}" font-size="9" fill="#8aa396">${fd(h[0].d)}</text><text x="${W-pr}" y="${H-4}" text-anchor="end" font-size="9" fill="#8aa396">${fd(h[n-1].d)}</text></svg>
+ <div class="text-xs text-zinc-500">Toca no gráfico para ver cada registo. Os treinos antigos guardam o peso que tinhas na altura.</div>
+ <div class="flex gap-2 items-start mt-3"><input id="wk" ${IN} inputmode="decimal" placeholder="Peso (kg)" style="margin-top:0"><input id="wdt" ${IN} type="date" value="${td()}" style="margin-top:0"><button class="b text-sm" style="white-space:nowrap" onclick="wAdd()">Registar</button></div>
+ <div class="mt-3">${rows}</div></div>`}
+
 function R(){if(ch){ch.destroy();ch=null}
  $('#nav').innerHTML=[['h','⚔️ Herói'],['t','🏋️ Treino'],['x','📋 Histórico'],['g','📈 Evolução'],['p','🎯 Provas &amp; Metas (300%)'],['c','🏆 Conquistas'],['d','💾 Dados']].map(([k,n])=>`<button onclick="V='${k}';R();scrollTo(0,0)" class="whitespace-nowrap px-3 py-2 rounded-lg text-sm ${V==k?'b':'g'}">${n}</button>`).join('');
  $('#m').innerHTML=({h:vH,t:vT,x:vX,g:vG,p:vP,c:vC,d:vD})[V]();if(V=='g')dc();if(V=='h')ap();if(V=='t'){pm0=pmul();upd()}}
-function boot(){try{const z=JSON.parse(localStorage.getItem('gymrpg-draft')||'null');if(z){draft=z.draft||{};dv=z.dv||''}}catch(e){}srt();chk();
+function boot(){wInit();try{const z=JSON.parse(localStorage.getItem('gymrpg-draft')||'null');if(z){draft=z.draft||{};dv=z.dv||''}}catch(e){}srt();chk();
  if(D.v!==33){if(D.ss.length)setTimeout(()=>toast('v3.3: XP recalculado com a fórmula de volume (Peso × Reps ÷ 10).'),300);D.v=33}
  save();R();onOpen();bkChk();cloudInit();
  IDB.keys().then(ks=>{let n=0;(ks||[]).forEach(k=>{const[a,b]=String(k).split('|');if(b=='video'){VX.add(+a);delete VU[+a];n++}});if(n&&(V=='h'||V=='d'))R()}).catch(()=>{});
