@@ -1,7 +1,9 @@
 <!DOCTYPE html>
 <html lang="pt-PT"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>GYM RPG v3.10</title>
+<title>GYM RPG v3.11</title>
+<link rel="manifest" href="manifest.json"><meta name="theme-color" content="#061a10"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="GYM RPG"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><link rel="apple-touch-icon" href="icon-192.png"><link rel="icon" href="icon-192.png">
+<script>if('serviceWorker'in navigator&&/^https?:$/.test(location.protocol))addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))</script>
 <script>/* Login com Google (opcional): cola aqui o Client ID OAuth, ou preenche-o dentro do jogo em Dados. */window.GYM_CLOUD={clientId:'114168499507-k34ql5rbtp84toedtj87at8jrobjim6j.apps.googleusercontent.com'};</script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&display=swap" rel="stylesheet">
@@ -96,12 +98,12 @@ function S(){
  const sw=w=>{let k=(wc[w]||0)>=STK_META?w:w-1,n=0;while((wc[k]||0)>=STK_META){n++;k--}return n};
  const atrof=g=>{if(!(g>ATR_DIAS))return null;const p=xp*Math.min(.25,(g-ATR_DIAS)*.005);xp-=p;rec+=p;return{dias:g,xp:p}};
  Object.keys(byD).sort().forEach(d=>{const n=dnum(d),ok=isFinite(n);let st=0;
-  if(ok){if(last!=null){const a=atrof(n-last);if(a)LOG.push({...a,d});cn=n-last>STK_GAP?1:cn+1}else cn=1;st=cn>=STK_META?cn:0}
+  if(ok){if(last!=null){const g0=eg(last,n),a=atrof(g0);if(a)LOG.push({...a,d});cn=g0>STK_GAP?1:cn+1}else cn=1;st=cn>=STK_META?cn:0}
   const m=st>=1?STK_MULT:1;
   byD[d].forEach(s=>{const v=s.ex.reduce((a,e)=>a+volE(e,swt(s)),0);let pr=0;s.ex.forEach(e=>{const k=mk(e.n);if(!k)return;const o=Math.max(...e.s.map(([w,r])=>r<=10?rm(w,r):0));if(rc[k]&&o>rc[k]*1.0001)pr=1;rc[k]=Math.max(rc[k]||0,o)});const g=Math.round(s.ex.reduce((a,e)=>a+xpE(e,swt(s)),0)*(pr?1.05:1)*m);xp+=g;if(rec>0){const q=Math.min(rec,g*.5);xp+=q;rec-=q}const qk=wkn(n),Q=QW[qk]=QW[qk]||{f:new Set,p:0,d:0};if(['Dia1','Dia2','Dia3','Dia4'].includes(s.day))Q.f.add(s.day);if(pr)Q.p=1;if(s.day=='Dia 3.1')Q.d=1;sx.set(s,{v,b:v/XP_DIV,m,x:g,st,pr});s.ex.forEach(e=>e.s.forEach(([w2,r])=>PBU(pb,e.n,w2,r,s.day)))});
   const pv=PV.reduce((a,x)=>a+(pb[x.id]?TIERS.filter(q=>pf(x,pb[x.id])>=q).reduce((z,q)=>z+TXP[q],0):0),0);xp+=pv-prov;prov=pv;
   if(ok)last=n});
- let qx=0;Object.values(QW).forEach(q=>{qx+=(q.f.size>=3?150:0)+(q.p?150:0)+(q.d?100:0)});xp+=qx;const T=dnum(td()),gl=last==null?null:T-last,atr=last==null?null:atrof(gl);
+ let qx=0;Object.values(QW).forEach(q=>{qx+=(q.f.size>=3?150:0)+(q.p?150:0)+(q.d?100:0)});xp+=qx;const T=dnum(td()),gl=last==null?null:eg(last,T),atr=last==null?null:atrof(gl);
  const alive=last!=null&&gl<=STK_GAP,stk=alive&&cn>=STK_META?cn:0,wkc=alive?cn:0;
  const xpd=Math.max(0,Math.round(xp)),fi=[];for(const k in Z){const a=Object.entries(Z[k]).map(([d,v])=>[T-dnum(d),v]).filter(x=>isFinite(x[0])).sort((p,q)=>p[0]-q[0]);if(!a.length)continue;const wn=a.filter(x=>x[0]<=90),sr=wn.length?wn:a,tp=sr.map(x=>x[1]).sort((p,q)=>q-p).slice(0,2),vv=tp.reduce((p,q)=>p+q,0)/tp.length;fi.push(Math.min(1,vv/LT[k])*(wn.length?1:Math.max(0,1-(a[0][0]-90)/90)))}
  const fs=fi.length?fi.reduce((p,q)=>p+q,0)/fi.length:0,Ld=Math.min(100,(xpd/XA)**(1/XP2)+1),Lc=Math.min(XM,Math.max(1,85*fs**2.6+.15*Ld));xp=CXP(Lc);if(atr){const pc=Math.min(.25,(gl-ATR_DIAS)*.005),x0=xp;xp=x0*(1-pc);atr.xp=x0-xp}const lv=LV(xp),ds=D.ss.map(s=>Date.parse(s.d)).filter(isFinite);
@@ -214,7 +216,7 @@ function vStk(s){const T=dnum(td()),m0=wkn(T)*7-3,set=new Set(D.ss.map(x=>dnum(x
 function vH0(){const s=S(),p=D.p,ne=RK2.find(x=>x[0]>s.lv),mx=s.lv>=XM,cur=CXP(s.lv),nx=mx?cur:CXP(s.lv+1),pc=mx?100:Math.min(100,(s.xp-cur)/(nx-cur)*100);
  const rk=stg(s.lv),r0=CXP(rk[0]),r1=ne?CXP(ne[0]):0,pr=ne?Math.min(100,Math.max(0,(s.xp-r0)/(r1-r0)*100)):100;
  const inf=p.kg?`${fm(p.kg)} kg${p.age?' · '+fm(p.age)+' anos':''} · ${fm(p.cm)} cm ✎`:'Definir perfil ✎';
- return`<div class="flex items-start justify-between gap-3"><div><h1 class="text-2xl font-bold text-[#39ff88]" style="text-shadow:0 0 14px #39ff8899">GYM RPG <span class="text-xs text-zinc-400 align-middle">v3.10</span></h1><div class="text-xs text-zinc-400">O Despertar do Titã</div></div><button class="text-right leading-tight" onclick="pe=!pe;R()"><div class="text-xs text-zinc-400">${inf}</div><div class="text-xs mt-1 font-semibold text-[#39ff88]/80">${s.t} · Nv ${s.lv}</div></button></div>
+ return`<div class="flex items-start justify-between gap-3"><div><h1 class="text-2xl font-bold text-[#39ff88]" style="text-shadow:0 0 14px #39ff8899">GYM RPG <span class="text-xs text-zinc-400 align-middle">v3.11</span></h1><div class="text-xs text-zinc-400">O Despertar do Titã</div></div><button class="text-right leading-tight" onclick="pe=!pe;R()"><div class="text-xs text-zinc-400">${inf}</div><div class="text-xs mt-1 font-semibold text-[#39ff88]/80">${s.t} · Nv ${s.lv}</div></button></div>
  ${pe||!p.kg?`<div class="c"><div class="grid grid-cols-3 gap-2 text-xs">${[['kg','Peso (kg)',p.kg],['cm','Altura (cm)',p.cm],['ag','Idade',p.age]].map(([k,n,v])=>`<label>${n}<input id="${k}" class="i mt-1" inputmode="decimal" value="${v?fm(v):''}"></label>`).join('')}</div><button class="b w-full mt-3" onclick="sp()">Guardar perfil</button></div>`:''}
  ${vStk(s)}${vMiss(s)}
  <div class="c text-center"><div class="flex items-end justify-between"><div class="text-left"><div class="text-xs text-zinc-400">Nível</div><div class="text-4xl font-bold text-[#39ff88]" style="text-shadow:0 0 16px #39ff8899">${s.lv}</div></div><div class="text-right"><div class="text-xs text-zinc-400">Rank · Fase ${fase(s.lv)}/10</div><div class="font-semibold">${s.t}</div></div></div>
@@ -233,7 +235,7 @@ function sp(){let kg=pn($('#kg').value),cm=pn($('#cm').value);if(cm&&cm<3)cm*=10
 
 function last(n){const z=nz(n),c=cd(n);for(let j=D.ss.length-1;j>=0;j--){const s=D.ss[j],e=s.ex.find(x=>nz(x.n)==z);if(e){const[w,r]=c?e.s[0]:e.s.reduce((a,c)=>rm(...c)>rm(...a)?c:a),df=(Date.now()-Date.parse(s.d))/864e5;return`${df>=5&&df<=9?'Semana passada':'Última sessão ('+fd(s.d)+')'}: ${c?c[2](w,r):`${fm(w)}kg × ${r} reps`}`}}return''}
 function vT(){const dr=draft[day]=draft[day]||{};
- let h=`<div class="grid grid-cols-4 gap-1">${DN.map(d=>`<button onclick="day='${d}';R()" class="rounded-lg text-xs whitespace-nowrap ${d==day?'b':'g'}" style="padding:9px 2px">${d}</button>`).join('')}</div>
+ let h=`<div class="grid grid-cols-4 gap-1">${DN.map(d=>`<button onclick="day='${d}';R()" class="rounded-lg text-xs whitespace-nowrap ${d==day?'b':'g'}" style="padding:9px 2px">${d}</button>`).join('')}</div>${dlCard()}
  <label class="text-xs text-zinc-400 block">Data do treino<input type="date" class="i mt-1" id="dt" value="${dv||td()}" oninput="dv=this.value;pm0=pmul();upd()"></label>`;
  EX(day).forEach((n,i)=>{const k=mk(n),c=cd(n),bw=c===BW,cx=car(n),st=dr[n]=dr[n]||[['',''],['',''],['','']],l=last(n);
   const h1=cx?c[0]:bw?'Lastro (kg)':'Peso (kg)',h2=cx?c[1]:'Repetições';
@@ -419,7 +421,7 @@ const IN='class="w-full rounded-lg bg-black/30 border border-white/15 px-3 py-2 
 function cfgSave(){const u=(($('#cu')||{}).value||'').trim();if(!/^[\w.-]+\.apps\.googleusercontent\.com$/.test(u))return toast('O Client ID acaba em .apps.googleusercontent.com');lss('gymrpg-g-cfg',JSON.stringify({id:u}));toast('Guardado. A recarregar…');setTimeout(()=>location.reload(),600)}
 function cfgClear(){try{localStorage.removeItem('gymrpg-g-cfg')}catch(e){}location.reload()}
 function cloudChip(){const T={off:'☁️ Ligar Google',local:'☁️ Entrar com Google',expired:'🔄 Reconectar Google',sync:'☁️ A sincronizar…',ok:'☁️ Sincronizado',err:'⚠️ Erro de sincronização'};return`<div class="flex justify-end mb-2"><button class="${CL.st=='ok'?'b':'g'} text-xs" onclick="${CL.st=='local'||CL.st=='expired'?'gLogin()':"V='d';R()"}">${T[CL.st]||'☁️ Google'}</button></div>`}
-const vH=()=>cloudChip()+vH0();
+const vH=()=>cloudChip()+dlBanner()+vH0();
 function vCloud(){const https=/^https:$/.test(location.protocol),lib=!!(window.google&&window.google.accounts),ck=(ok,t)=>`<div class="text-xs ${ok?'text-[#7dffb3]':'text-zinc-400'}">${ok?'✅':'⬜'} ${t}</div>`,
  M={off:'Falta o Client ID do Google: segue os passos abaixo (é só uma vez).',local:'Entra com a tua conta Google. Os treinos ficam guardados na tua conta (pasta privada da app no Drive) e aparecem no PC e no telemóvel.',expired:'A sessão Google expirou. Toca em Reconectar (1 toque).',sync:'⏳ A sincronizar…',ok:'✅ Guardado na tua conta Google'+(CL.email?' ('+esc(CL.email)+')':'')+'. As alterações feitas noutros dispositivos aparecem sozinhas.',err:'⚠️ '+esc(CL.msg||'Erro')+'. Os dados estão guardados aqui e são reenviados quando for possível.'};
  return`<div class="c"><b class="text-[#39ff88]">☁️ Conta Google</b><div class="text-xs text-zinc-300 mt-1">${M[CL.st]||''}</div>
@@ -429,7 +431,7 @@ function vCloud(){const https=/^https:$/.test(location.protocol),lib=!!(window.g
  <ol class="text-xs text-zinc-400 mt-3 list-decimal pl-4 space-y-1"><li>console.cloud.google.com → cria um projeto.</li><li>APIs e serviços → Biblioteca → ativa a <b>Google Drive API</b>.</li><li>Ecrã de consentimento OAuth → Externo → preenche o nome e o teu email; em "Utilizadores de teste" adiciona o teu Gmail.</li><li>Credenciais → Criar credenciais → ID de cliente OAuth → Aplicação Web.</li><li>Em "Origens JavaScript autorizadas" mete: <b class="text-[#e8fff1] break-all select-all">${esc(location.origin)}</b></li><li>Copia o Client ID para o campo acima.</li></ol></details></div>`}
 const hasBk=()=>!!lsg('gymrpg-backup-sync');
 function restoreBk(){try{const b=JSON.parse(lsg('gymrpg-backup-sync'));if(!b)return;replaceD(b);D.ts=Date.now();save();toast('Dados anteriores restaurados');R()}catch(e){toast('Não foi possível restaurar.')}}
-const vD=()=>vCloud()+vD0();
+const vD=()=>vCloud()+vInst()+vD0();
 
 /* ===== v3.10 · Histórico de peso: cada alteração fica registada e os treinos antigos usam o peso que tinhas na altura ===== */
 function wInit(){if(!Array.isArray(D.wh))D.wh=[];if(!D.wh.length&&+D.p.kg>0){const d=D.ss.length?D.ss.map(x=>x.d).filter(Boolean).sort()[0]:td();D.wh.push({d,kg:+D.p.kg})}}
@@ -452,12 +454,55 @@ function vPeso(){wInit();const h=D.wh.filter(x=>+x.kg>0).slice().sort((a,b)=>a.d
  <div class="flex gap-2 items-start mt-3"><input id="wk" ${IN} inputmode="decimal" placeholder="Peso (kg)" style="margin-top:0"><input id="wdt" ${IN} type="date" value="${td()}" style="margin-top:0"><button class="b text-sm" style="white-space:nowrap" onclick="wAdd()">Registar</button></div>
  <div class="mt-3">${rows}</div></div>`}
 
+/* ===== v3.11 · Semana de descarga · Resumo semanal/mensal · Instalar como app ===== */
+const DLN=7;
+function dlWin(){return(D.dlw||[]).map(x=>[dnum(x.s),dnum(x.e)]).filter(x=>isFinite(x[0])&&isFinite(x[1]))}
+function dlOv(a,b){let c=0;dlWin().forEach(([s,e])=>{const lo=Math.max(a+1,s),hi=Math.min(b,e);if(hi>=lo)c+=hi-lo+1});return c}
+function eg(a,b){return Math.max(0,b-a-dlOv(a,b))}
+function dlAct(){const T=dnum(td());return dlWin().find(([s,e])=>T>=s&&T<=e)||null}
+function dlStart(){D.dlw=(D.dlw||[]).concat([{s:td(),e:dstr(dnum(td())+DLN-1)}]);save();R();toast('🛌 Semana de descarga iniciada')}
+function dlEnd(){const a=dlAct();if(!a)return;D.dlw=D.dlw.map(x=>dnum(x.s)==a[0]?{...x,e:td()}:x);save();R();toast('Descarga terminada')}
+function dlSnz(){D.dls=dstr(dnum(td())+3);save();R()}
+function dlSug(){if(dlAct()||!D.ss.length||(D.dls&&td()<=D.dls))return null;const T=dnum(td()),ds=D.ss.map(x=>dnum(x.d)).filter(isFinite).sort((a,b)=>a-b);if(!ds.length||T-ds[ds.length-1]>14)return null;
+ const en=(D.dlw||[]).map(x=>dnum(x.e)).filter(isFinite),ref=en.length?Math.max(...en):ds[0],ws=Math.floor((T-ref)/7);if(ws<3)return null;
+ if(ws>=5)return`Há ${ws} semanas sem descarga (o ideal é a cada 4 a 6 semanas)`;
+ const s=S();let st=0,tot=0;for(const k of['sup','agach','dead','hip']){let a=0,b=0;Object.entries(s.h[k]||{}).forEach(([d,v])=>{const g=T-dnum(d);if(g<=21)a=Math.max(a,v);else if(g<=49)b=Math.max(b,v)});if(a&&b){tot++;if(a<=b*1.005)st++}}
+ return ws>=4&&tot>=2&&st>=2?`Estagnação em ${st} dos ${tot} levantamentos principais nas últimas semanas`:null}
+function dlBanner(){const T=dnum(td()),a=dlAct(),B='style="border-color:rgba(255,200,87,.45)"';
+ if(a){const l=a[1]-T+1;return`<div class="c" ${B}><b class="text-[#ffd166]">🛌 Semana de descarga ativa</b><div class="text-xs text-zinc-300 mt-1">Até ${fd(dstr(a[1]))} (${l} ${l==1?'dia':'dias'}). Cerca de metade das séries e −12% de carga. A atrofia e o streak não contam nesta semana. Vê as cargas sugeridas no separador Treino.</div><button class="g text-sm mt-3" onclick="dlEnd()">Terminar descarga</button></div>`}
+ const g=dlSug();return g?`<div class="c" ${B}><b class="text-[#ffd166]">🛌 Semana de descarga sugerida</b><div class="text-xs text-zinc-300 mt-1">${esc(g)}. Durante 7 dias: cerca de metade das séries e −10 a 15% de carga. A atrofia não conta nessa semana.</div><div class="flex gap-2 mt-3"><button class="b text-sm" onclick="dlStart()">Iniciar descarga</button><button class="g text-sm" onclick="dlSnz()">Agora não</button></div></div>`:''}
+const rnd=w=>Math.round(w*2)/2;
+function dlSugEx(e){const n=nz(e.n),c=cd(e.n),Z=e.s||[],N=Z.length;if(!N)return'';const h=Math.max(1,Math.ceil(N/2)),sr=h==1?'série':'séries',mx=i=>Math.max(...Z.map(z=>+z[i]||0)),G='<span class="text-zinc-500">';
+ if(!c){const rs=Z.map(z=>+z[1]||0).sort((a,b)=>a-b);return`<b>${fm(rnd(mx(0)*.875))} kg</b> × ${rs[Math.floor(N/2)]} reps · ${h} ${sr} ${G}(antes: ${fm(mx(0))} kg, ${N} séries)</span>`}
+ if(c===BW){const w=mx(0);return`<b>${Math.max(1,Math.round(mx(1)*.85))} reps</b>${w?` + ${fm(rnd(w*.875))} kg`:''} · ${h} ${sr} ${G}(antes: ${mx(1)} reps, ${N} séries)</span>`}
+ const w=+Z[0][0]||0,r=+Z[0][1]||0,ct=['series 400m','sprints 100m','box jump','salto comprimento'].includes(n);
+ return`<b>${ct?c[2](w,Math.max(1,Math.ceil(r/2))):c[2](w*.875,Math.round(r*.875))}</b> ${G}(antes: ${c[2](w,r)}) · ritmo leve</span>`}
+function dlCard(){if(!dlAct())return'';const W=dlWin(),inW=x=>{const n=dnum(x.d);return W.some(([a,b])=>n>=a&&n<=b)},L=D.ss.filter(x=>x.day==day&&!inW(x)).sort((a,b)=>a.d<b.d?-1:1).pop();
+ return`<div class="c" style="border-color:rgba(255,200,87,.45)"><b class="text-[#ffd166]">🛌 Descarga · ${esc(day)}</b>${L?`<div class="text-xs text-zinc-400 mt-1">Com base no último treino (${fd(L.d)}): cerca de metade das séries e −12% de carga.</div>${L.ex.map(e=>`<div class="mt-2 text-sm"><b>${esc(e.n)}</b><div class="text-xs text-[#e8fff1]">${dlSugEx(e)}</div></div>`).join('')}`:'<div class="text-xs text-zinc-400 mt-1">Ainda não tens um treino registado neste dia para calcular.</div>'}</div>`}
+var RV={m:'w',o:0};const MES=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+function rvRange(){const T=dnum(td());if(RV.m=='w'){const a=wkn(T)*7-3+RV.o*7;return[a,a+6]}const t=new Date();t.setDate(1);t.setMonth(t.getMonth()+RV.o);const y=t.getFullYear(),m=t.getMonth(),n=new Date(y,m+1,1),p=v=>String(v).padStart(2,'0');return[dnum(`${y}-${p(m+1)}-01`),dnum(`${n.getFullYear()}-${p(n.getMonth()+1)}-01`)-1]}
+function vR(){const s=S(),[a,b]=rvRange(),len=b-a+1,inR=(x,lo,hi)=>{const n=dnum(x.d);return n>=lo&&n<=hi},ss=D.ss.filter(x=>inR(x,a,b)),ps=D.ss.filter(x=>inR(x,a-len,a-1)),vol=L=>L.reduce((t,x)=>t+x.ex.reduce((u,e)=>u+volE(e,swt(x)),0),0),v=vol(ss),pv=vol(ps),days=new Set(ss.map(x=>x.d)).size,xp=ss.reduce((t,x)=>t+((s.sx.get(x)||{}).x||0),0),
+ best=(L,k)=>{let m=0;L.forEach(x=>x.ex.forEach(e=>{if(mk(e.n)==k)e.s.forEach(([w,r])=>{if(r<=10)m=Math.max(m,rm(w,r))})}));return m},before=D.ss.filter(x=>dnum(x.d)<a),LN={sup:'Supino',agach:'Agachamento',dead:'Deadlift',hip:'Hip Thrust'},
+ recs=Object.keys(LN).map(k=>[k,best(before,k),best(ss,k)]).filter(([k,p,q])=>p>0&&q>p*1.0001),T=dnum(td()),w0=wAt(dstr(a)),w1=wAt(dstr(Math.min(b,T))),dl=dlWin().some(([x,y])=>x<=b&&y>=a),dv=pv?Math.round((v-pv)/pv*100):null,
+ ev={};ss.forEach(x=>x.ex.forEach(e=>{ev[e.n]=(ev[e.n]||0)+volE(e,swt(x))}));const top=Object.entries(ev).sort((p,q)=>q[1]-p[1])[0],
+ tl=(t,val,sub)=>`<div class="rounded-xl border border-white/10 p-3 bg-black/20"><div class="text-xs text-zinc-400">${t}</div><div class="text-xl font-semibold text-[#39ff88]">${val}</div><div class="text-xs text-zinc-500">${sub||'&nbsp;'}</div></div>`,
+ title=RV.m=='w'?`${fd(dstr(a))} – ${fd(dstr(b))}`:`${MES[new Date(dstr(a)+'T12:00').getMonth()]} ${new Date(dstr(a)+'T12:00').getFullYear()}`,bt=(m,t)=>`<button class="${RV.m==m?'b':'g'} text-sm" onclick="RV.m='${m}';RV.o=0;R()">${t}</button>`;
+ return`<div class="c"><div class="flex gap-2">${bt('w','Semana')}${bt('m','Mês')}</div><div class="flex items-center justify-between mt-3"><button class="g text-sm" onclick="RV.o--;R()">◀</button><b class="text-[#39ff88]">${title}${RV.o==0?' · atual':''}</b><button class="g text-sm" ${RV.o>=0?'disabled style="opacity:.3"':''} onclick="RV.o++;R()">▶</button></div>${dl?'<div class="text-xs text-[#ffd166] mt-2">🛌 Inclui uma semana de descarga</div>':''}</div>`
+ +(ss.length?`<div class="grid grid-cols-2 gap-2">${tl('Treinos',ss.length,days+' dias treinados')}${tl('Volume',fx(v)+' kg',dv==null?'':(dv>=0?'▲ ':'▼ ')+Math.abs(dv)+'% vs anterior')}${tl('XP ganho','+'+fx(xp),'')}${tl('Recordes',recs.length,'nos 4 levantamentos')}</div>
+ <div class="c text-sm"><b class="text-[#39ff88]">🏅 Recordes (1RM estimado)</b>${recs.length?recs.map(([k,p,q])=>`<div class="flex justify-between mt-1"><span>${LN[k]}</span><span><b>${fm(q)} kg</b> <span class="text-[#7dffb3] text-xs">+${fm(q-p)} kg</span></span></div>`).join(''):'<div class="text-xs text-zinc-500 mt-1">Sem recordes neste período.</div>'}${top?`<div class="text-xs text-zinc-400 mt-3">Exercício com mais volume: <b class="text-[#e8fff1]">${esc(top[0])}</b> (${fx(top[1])} kg)</div>`:''}</div>
+ <div class="c text-sm"><b class="text-[#39ff88]">⚖️ Peso</b><div class="mt-1">${f2(w0)} → ${f2(w1)} kg <span class="text-xs ${w1>w0?'text-red-300':w1<w0?'text-[#7dffb3]':'text-zinc-500'}">${w1==w0?'sem alteração':(w1>w0?'+':'−')+fm(Math.abs(Math.round((w1-w0)*10)/10))+' kg'}</span></div></div>`:'<div class="c text-sm text-zinc-500">Sem treinos neste período.</div>')}
+function rvChk(){if(!D.ss.length)return;const wk=wkn(dnum(td()));if(D.rv===wk)return;const has=D.ss.some(x=>wkn(dnum(x.d))==wk-1);D.rv=wk;save();if(has)setTimeout(()=>toast('📅 O resumo da semana passada já está pronto (separador Resumo).'),1200)}
+var INST=null;addEventListener('beforeinstallprompt',e=>{e.preventDefault();INST=e;if(V=='d')R()});addEventListener('appinstalled',()=>{INST=null;toast('📲 App instalada!')});
+const isSA=()=>{try{return matchMedia('(display-mode: standalone)').matches||navigator.standalone}catch(e){return false}};
+function doInstall(){if(INST){INST.prompt();INST=null}}
+function vInst(){if(isSA())return'';return`<div class="c"><b class="text-[#39ff88]">📲 Instalar no telemóvel</b><div class="text-xs text-zinc-300 mt-1">Ícone no ecrã, abre sem barra do navegador e funciona offline.</div>${INST?'<button class="b text-sm mt-3" onclick="doInstall()">Instalar app</button>':'<div class="text-xs text-zinc-400 mt-2">Android (Chrome): menu ⋮ → Instalar app. iPhone (Safari): Partilhar → Adicionar ao ecrã principal.</div>'}</div>`}
+
 function R(){if(ch){ch.destroy();ch=null}
- $('#nav').innerHTML=[['h','⚔️ Herói'],['t','🏋️ Treino'],['x','📋 Histórico'],['g','📈 Evolução'],['p','🎯 Provas &amp; Metas (300%)'],['c','🏆 Conquistas'],['d','💾 Dados']].map(([k,n])=>`<button onclick="V='${k}';R();scrollTo(0,0)" class="whitespace-nowrap px-3 py-2 rounded-lg text-sm ${V==k?'b':'g'}">${n}</button>`).join('');
- $('#m').innerHTML=({h:vH,t:vT,x:vX,g:vG,p:vP,c:vC,d:vD})[V]();if(V=='g')dc();if(V=='h')ap();if(V=='t'){pm0=pmul();upd()}}
+ $('#nav').innerHTML=[['h','⚔️ Herói'],['t','🏋️ Treino'],['x','📋 Histórico'],['r','📅 Resumo'],['g','📈 Evolução'],['p','🎯 Provas &amp; Metas (300%)'],['c','🏆 Conquistas'],['d','💾 Dados']].map(([k,n])=>`<button onclick="V='${k}';R();scrollTo(0,0)" class="whitespace-nowrap px-3 py-2 rounded-lg text-sm ${V==k?'b':'g'}">${n}</button>`).join('');
+ $('#m').innerHTML=({h:vH,t:vT,x:vX,r:vR,g:vG,p:vP,c:vC,d:vD})[V]();if(V=='g')dc();if(V=='h')ap();if(V=='t'){pm0=pmul();upd()}}
 function boot(){wInit();try{const z=JSON.parse(localStorage.getItem('gymrpg-draft')||'null');if(z){draft=z.draft||{};dv=z.dv||''}}catch(e){}srt();chk();
  if(D.v!==33){if(D.ss.length)setTimeout(()=>toast('v3.3: XP recalculado com a fórmula de volume (Peso × Reps ÷ 10).'),300);D.v=33}
- save();R();onOpen();bkChk();cloudInit();
+ save();R();onOpen();bkChk();rvChk();cloudInit();
  IDB.keys().then(ks=>{let n=0;(ks||[]).forEach(k=>{const[a,b]=String(k).split('|');if(b=='video'){VX.add(+a);delete VU[+a];n++}});if(n&&(V=='h'||V=='d'))R()}).catch(()=>{});
  document.addEventListener('visibilitychange',()=>{if(!document.hidden)onOpen()})}
 </script>
