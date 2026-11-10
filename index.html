@@ -14,9 +14,9 @@
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 body{background:#04120b;color:#e8fff1;font-family:'Chakra Petch',system-ui,sans-serif;min-height:100vh;overflow-x:hidden}
 .c{background:rgba(6,24,15,.58);border:1px solid rgba(57,255,136,.26);border-radius:18px;padding:14px;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 8px 30px rgba(0,0,0,.4)}
-.hero-box{background:radial-gradient(circle at 50% 88%,rgba(57,255,136,.35) 0%,transparent 55%),radial-gradient(circle at 50% 45%,rgba(16,185,129,.15) 0%,#05130c 80%)!important}
-.hero-box::before{content:'';position:absolute;inset:-50%;background:conic-gradient(from 0deg,transparent 0%,rgba(57,255,136,.12) 25%,transparent 50%,rgba(57,255,136,.12) 75%,transparent 100%);animation:spinAura 14s linear infinite;pointer-events:none}
-@keyframes spinAura{to{transform:rotate(360deg)}}
+.hero-box{background:#14251d;position:relative;isolation:isolate}
+.hero-box::after{content:'';position:absolute;inset:0;z-index:25;pointer-events:none;border-radius:16px;box-shadow:inset 0 0 26px var(--aura-glow,rgba(57,255,136,.5)),inset 0 -30px 42px var(--aura-bot,rgba(57,255,136,.32));animation:pulseAura 2.6s ease-in-out infinite alternate}
+@keyframes pulseAura{from{opacity:.6}to{opacity:1}}
 .i{background:rgba(4,18,11,.75);border:1px solid rgba(57,255,136,.25);border-radius:10px;padding:6px 8px;width:100%;color:#e8fff1}
 .i:focus,button:focus-visible{outline:2px solid #39ff88}
 .b{background:#39ff88;color:#04210f;font-weight:700;border-radius:999px;padding:8px 16px;box-shadow:0 0 18px #39ff8899}
@@ -26,7 +26,7 @@ body{background:#04120b;color:#e8fff1;font-family:'Chakra Petch',system-ui,sans-
 .fl{display:inline-block;animation:fl 1.1s ease-in-out infinite alternate}
 @keyframes fl{from{transform:scale(1) rotate(-4deg);filter:drop-shadow(0 0 3px #ff9a3c)}to{transform:scale(1.15) rotate(4deg);filter:drop-shadow(0 0 10px #ffcc33)}}
 .alr{border-color:#ff4d6d!important;box-shadow:0 0 34px #ff4d6d55!important}
-@media (prefers-reduced-motion:reduce){.fl,.hero-box::before{animation:none}.av{transition:none}}
+@media (prefers-reduced-motion:reduce){.fl,.hero-box::after{animation:none}.av{transition:none}}
 </style></head>
 <body onload="boot()">
 <canvas id="appBg" class="fixed inset-0 w-full h-full pointer-events-none z-0"></canvas>
@@ -61,7 +61,7 @@ const CD={'saltar corda':['minutos','saltos',(w,r)=>`${fm(w)} min · ${r} saltos
 const cd=n=>CD[nz(n)],car=n=>{const c=cd(n);return!!c&&c!==BW};
 const td=()=>new Date(Date.now()-new Date().getTimezoneOffset()*6e4).toISOString().slice(0,10);
 const fd=d=>d.slice(8)+'/'+d.slice(5,7)+'/'+d.slice(2,4);
-/* EX(d) inclui agora os exercícios base + os exercícios extra personalizados (D.cx) */
+/* EX(d) inclui os exercícios base + os exercícios extra personalizados (D.cx) */
 const EX=d=>(PL[d]||[]).concat((D.cx&&D.cx[d])||[]);
 function toast(t){const e=document.createElement('div');e.className='c on text-[#7dffb3] text-sm';e.textContent=t;$('#t').append(e);setTimeout(()=>e.remove(),4200)}
 function srt(){D.ss.sort((a,b)=>a.d<b.d?-1:a.d>b.d?1:0);const z=new Set;D.ss=D.ss.filter(s=>{const k=JSON.stringify(s);return z.has(k)?0:z.add(k)})}
@@ -74,11 +74,11 @@ const DAY=864e5,dnum=d=>Math.round(Date.parse(d)/DAY),wkn=n=>Math.floor((n+3)/7)
 function volE(e,kg){const c=cd(e.n);if(c&&c!==BW)return 0;const bw=c===BW?(+kg||+D.p.kg||0):0;return e.s.reduce((a,[w,r])=>a+(bw+(+w||0))*(+r||0),0)}
 
 /* Curva de nível: XP acumulado = 30 × (nível − 1)^2,8
-   TXP corrigido para somar exatamente +100, +250, +500, +900 e +1500 XP acumulados nas metas de 100% a 300% */
+   TXP ajustado para somar exatamente +100, +250, +500, +900 e +1500 XP acumulados nas metas de 100% a 300% */
 const XA=30,XP2=2.8,XM=100,fx=n=>Math.round(n).toLocaleString('pt-PT'),CXP=L=>XA*(L-1)**XP2,LV=x=>Math.min(XM,Math.floor((x/XA)**(1/XP2)+1e-9)+1),TXP={100:100,150:150,200:250,250:400,300:600};
 
 /* Melhores marcas para as provas, lidas dos registos.
-   Nos Sprints (c80): se o tempo inserido for < 12,2s assume medição direta aos 80m; se for >= 12,2s converte dos 100m (×0,8). */
+   Nos Sprints (c80): se o tempo inserido for < 12,2s assume medição direta aos 80m; se >= 12,2s converte dos 100m (×0,8). */
 const PD=['Dia1.2','Dia 2.1','Dia 3.1','Dia 4.1'];
 function PBU(pb,name,w,r,d){if(!PD.includes(d))return;const n=nz(name),u=(k,v,mx,t)=>{if(v>0&&(pb[k]==null||(mx?v>pb[k]:v<pb[k]))){pb[k]=v;if(t)pb['~'+k]=t}};
  if(n=='barras'||n=='abdominais 1min/1min'||n=='flexoes 2min/1min')u(n,r,1);
@@ -242,7 +242,7 @@ function drawRadar(){
   },
   options:{
    responsive:true,maintainAspectRatio:false,
-   scales:{r:{min:0,max:100, beginAtZero:true, angleLines:{color:'rgba(57,255,136,0.18)'}, grid:{color:'rgba(255,255,255,0.1)'}, pointLabels:{color:'#e8fff1',font:{family:'Chakra Petch',size:11,weight:'600'}}, ticks:{display:false,stepSize:25}}},
+   scales:{r:{min:0,max:100,beginAtZero:true,angleLines:{color:'rgba(57,255,136,0.18)'},grid:{color:'rgba(255,255,255,0.1)'},pointLabels:{color:'#e8fff1',font:{family:'Chakra Petch',size:11,weight:'600'}},ticks:{display:false,stepSize:25}}},
    plugins:{legend:{display:false}}
   }
  });
@@ -263,14 +263,29 @@ function vStk(s){const T=dnum(td()),m0=wkn(T)*7-3,set=new Set(D.ss.map(x=>dnum(x
   ${on?`<div class="px-3 py-1 rounded-full text-[11px] font-bold bg-[#39ff88] text-[#04210f] text-center leading-tight" style="box-shadow:0 0 16px #39ff88">+5% XP<br>ATIVO</div>`:`<div class="px-3 py-1 rounded-full text-[11px] border border-white/20 text-zinc-400 text-center leading-tight">Bónus +5%<br>inativo</div>`}</div>
   <div class="flex gap-1 mt-3">${pips}</div>
   <div class="text-xs text-zinc-400 mt-2">${l1}</div>${l2?`<div class="text-xs text-zinc-400 mt-1">${l2}</div>`:''}${l3}</div>`}
+
+/* Separador Notificações (Descarga + Consistência/Streak + Missões da Semana) */
+function hasNotifAlert(){try{const s=S();return !!(dlAct()||dlSug()||(s.gl!=null&&s.gl>=ATR_DIAS-2))}catch(e){return false}}
+function vN(){
+ const s=S(),b=dlBanner();
+ return`<div class="c flex items-center justify-between"><b class="text-[#39ff88]">🔔 Centro de Notificações &amp; Estado</b><span class="text-xs text-zinc-400">Streak, Descarga e Missões</span></div>`
+  +(b||`<div class="c text-xs text-zinc-400">🛌 <b class="text-[#e8fff1]">Semana de descarga:</b> Sem descarga ativa ou sugerida de momento (recomendada a cada 4 a 6 semanas).</div>`)
+  +vStk(s)+vMiss(s);
+}
+
 function vH0(){const s=S(),p=D.p,ne=RK2.find(x=>x[0]>s.lv),mx=s.lv>=XM,cur=CXP(s.lv),nx=mx?cur:CXP(s.lv+1),pc=mx?100:Math.min(100,(s.xp-cur)/(nx-cur)*100);
  const rk=stg(s.lv),r0=CXP(rk[0]),r1=ne?CXP(ne[0]):0,pr=ne?Math.min(100,Math.max(0,(s.xp-r0)/(r1-r0)*100)):100;
  const inf=p.kg?`${fm(p.kg)} kg${p.age?' · '+fm(p.age)+' anos':''} · ${fm(p.cm)} cm ✎`:'Definir perfil ✎';
+ const mCol=BG.mode==='atrophy'?'255,77,109':BG.mode==='deload'?'255,209,102':BG.mode==='streak'?'255,204,51':'57,255,136';
  return`<div class="flex items-start justify-between gap-3"><div><h1 class="text-2xl font-bold text-[#39ff88]" style="text-shadow:0 0 14px #39ff8899">GYM RPG <span class="text-xs text-zinc-400 align-middle">v3.12</span></h1><div class="text-xs text-zinc-400">O Despertar do Titã</div></div><button class="text-right leading-tight" onclick="pe=!pe;R()"><div class="text-xs text-zinc-400">${inf}</div><div class="text-xs mt-1 font-semibold text-[#39ff88]/80">${s.t} · Nv ${s.lv}</div></button></div>
  ${pe||!p.kg?`<div class="c"><div class="grid grid-cols-3 gap-2 text-xs">${[['kg','Peso (kg)',p.kg],['cm','Altura (cm)',p.cm],['ag','Idade',p.age]].map(([k,n,v])=>`<label>${n}<input id="${k}" class="i mt-1" inputmode="decimal" value="${v?fm(v):''}"></label>`).join('')}</div><button class="b w-full mt-3" onclick="sp()">Guardar perfil</button></div>`:''}
- ${vStk(s)}${vMiss(s)}
  <div class="c text-center"><div class="flex items-end justify-between"><div class="text-left"><div class="text-xs text-zinc-400">Nível</div><div class="text-4xl font-bold text-[#39ff88]" style="text-shadow:0 0 16px #39ff8899">${s.lv}</div></div><div class="text-right"><div class="text-xs text-zinc-400">Rank · Fase ${fase(s.lv)}/10</div><div class="font-semibold">${s.t}</div></div></div>
- <div class="hero-box relative mx-auto mt-3 w-full max-w-[360px] aspect-[2/3] rounded-2xl overflow-hidden border border-[#39ff88]/30" style="box-shadow:0 0 ${(18+pr*.42).toFixed(0)}px rgba(57,255,136,${(.2+pr*.005).toFixed(2)})"><img id="iF" alt="Avatar de frente" class="av absolute inset-0 w-full h-full object-contain z-10"><img id="iB" alt="Avatar de costas" class="av absolute inset-0 w-full h-full object-contain z-10" style="opacity:0"><video id="iV" class="av absolute inset-0 w-full h-full object-contain z-10" muted loop playsinline autoplay preload="auto" disablepictureinpicture style="opacity:0"></video></div>
+ <div id="heroBox" class="hero-box relative mx-auto mt-3 w-full max-w-[360px] aspect-[2/3] rounded-2xl overflow-hidden border border-[#39ff88]/35" style="--aura-glow:rgba(${mCol},.55);--aura-bot:rgba(${mCol},.35);box-shadow:0 0 ${(18+pr*.42).toFixed(0)}px rgba(${mCol},${(.22+pr*.005).toFixed(2)})">
+  <img id="iF" alt="Avatar de frente" class="av absolute inset-0 w-full h-full object-contain z-10">
+  <img id="iB" alt="Avatar de costas" class="av absolute inset-0 w-full h-full object-contain z-10" style="opacity:0">
+  <video id="iV" class="av absolute inset-0 w-full h-full object-contain z-10" muted loop playsinline autoplay preload="auto" disablepictureinpicture style="opacity:0"></video>
+  <canvas id="heroAuraCv" class="absolute inset-0 w-full h-full z-20" style="mix-blend-mode:screen;touch-action:pan-y"></canvas>
+ </div>
  <div class="flex gap-2 mt-3 max-w-[360px] mx-auto"><button id="btnV" onclick="tf('video')">▶ VÍDEO</button><button id="btnF" onclick="tf('frente')">FRENTE</button><button id="btnC" onclick="tf('costas')">COSTAS</button></div>
  <div class="mt-4 text-left">
   <div class="flex justify-between gap-2 text-xs"><span class="text-zinc-400">${mx?'Nível máximo':`Nível ${s.lv} → ${s.lv+1}`}</span><span>${mx?'':`${fx(s.xp-cur)} / ${fx(nx-cur)} XP`}</span></div>
@@ -318,6 +333,7 @@ function fin(){const dr=draft[day]||{},ex=[];
  const nw=chk(),s1=S(),g=s1.sx.get(ns);delete draft[day];dv='';sd();
  if(!g){save();R();return toast('Esse treino já estava registado.')}
  if(typeof bgPulse==='function')bgPulse();
+ if(typeof heroPulse==='function')heroPulse();
  toast(`Treino guardado! Volume ${fx(g.v)} kg → +${fx(g.x)} XP${g.m>1?' (🔥 +5% streak)':''}`);if(g.pr)toast('🏅 Novo recorde! +5% de XP neste treino');
  if(s1.lv>s0.lv)toast('⬆️ Nível '+s1.lv+'!');
  if(stg(s1.lv)[0]>stg(s0.lv)[0]){toast('🎉 Novo rank: '+s1.t+' — o avatar evoluiu para a fase '+fase(s1.lv)+'!');face='video'}
@@ -473,8 +489,20 @@ function cloudInit(){if(!okId){setSt('off');return}
 const IN='class="w-full rounded-lg bg-black/30 border border-white/15 px-3 py-2 text-sm mt-2"';
 function cfgSave(){const u=(($('#cu')||{}).value||'').trim();if(!/^[\w.-]+\.apps\.googleusercontent\.com$/.test(u))return toast('O Client ID acaba em .apps.googleusercontent.com');lss('gymrpg-g-cfg',JSON.stringify({id:u}));toast('Guardado. A recarregar…');setTimeout(()=>location.reload(),600)}
 function cfgClear(){try{localStorage.removeItem('gymrpg-g-cfg')}catch(e){}location.reload()}
-function cloudChip(){const T={off:'☁️ Ligar Google',local:'☁️ Entrar com Google',expired:'🔄 Reconectar Google',sync:'☁️ A sincronizar…',ok:'☁️ Sincronizado',err:'⚠️ Erro de sincronização'};return`<div class="flex justify-end mb-2"><button class="${CL.st=='ok'?'b':'g'} text-xs" onclick="${CL.st=='local'||CL.st=='expired'?'gLogin()':"V='d';R()"}">${T[CL.st]||'☁️ Google'}</button></div>`}
-const vH=()=>cloudChip()+dlBanner()+vH0();
+function cloudChip(){
+ const s=S(),al=hasNotifAlert();
+ const T={off:'☁️ Ligar Google',local:'☁️ Entrar com Google',expired:'🔄 Reconectar Google',sync:'☁️ A sincronizar…',ok:'☁️ Sincronizado',err:'⚠️ Erro de sincronização'};
+ return`<div class="flex justify-between items-center mb-2">
+  <button class="g text-xs flex items-center gap-1.5 ${al?'border-[#ffd166]/60 text-[#ffd166]':''}" onclick="V='n';R()">
+   <span>🔔 Notificações</span>
+   ${s.mult?'<span class="text-[#39ff88] font-bold">🔥 +5%</span>':''}
+   ${dlAct()?'<span class="text-[#ffd166]">🛌 Descarga</span>':''}
+   ${s.gl>ATR_DIAS?'<span class="text-[#ff8fa3]">⚠️ Atrofia</span>':''}
+  </button>
+  <button class="${CL.st=='ok'?'b':'g'} text-xs" onclick="${CL.st=='local'||CL.st=='expired'?'gLogin()':"V='d';R()"}">${T[CL.st]||'☁️ Google'}</button>
+ </div>`;
+}
+const vH=()=>cloudChip()+vH0();
 function vCloud(){const https=/^https:$/.test(location.protocol),lib=!!(window.google&&window.google.accounts),ck=(ok,t)=>`<div class="text-xs ${ok?'text-[#7dffb3]':'text-zinc-400'}">${ok?'✅':'⬜'} ${t}</div>`,
  M={off:'Falta o Client ID do Google: segue os passos abaixo (é só uma vez).',local:'Entra com a tua conta Google. Os treinos ficam guardados na tua conta (pasta privada da app no Drive) e aparecem no PC e no telemóvel.',expired:'A sessão Google expirou. Toca em Reconectar (1 toque).',sync:'⏳ A sincronizar…',ok:'✅ Guardado na tua conta Google'+(CL.email?' ('+esc(CL.email)+')':'')+'. As alterações feitas noutros dispositivos aparecem sozinhas.',err:'⚠️ '+esc(CL.msg||'Erro')+'. Os dados estão guardados aqui e são reenviados quando for possível.'};
  return`<div class="c"><b class="text-[#39ff88]">☁️ Conta Google</b><div class="text-xs text-zinc-300 mt-1">${M[CL.st]||''}</div>
@@ -550,7 +578,7 @@ const isSA=()=>{try{return matchMedia('(display-mode: standalone)').matches||nav
 function doInstall(){if(INST){INST.prompt();INST=null}}
 function vInst(){if(isSA())return'';return`<div class="c"><b class="text-[#39ff88]">📲 Instalar no telemóvel</b><div class="text-xs text-zinc-300 mt-1">Ícone no ecrã, abre sem barra do navegador e funciona offline.</div>${INST?'<button class="b text-sm mt-3" onclick="doInstall()">Instalar app</button>':'<div class="text-xs text-zinc-400 mt-2">Android (Chrome): menu ⋮ → Instalar app. iPhone (Safari): Partilhar → Adicionar ao ecrã principal.</div>'}</div>`}
 
-/* ===== Motor de Fundo Interativo Dinâmico ("Aura do Titã" em HTML5 Canvas) ===== */
+/* ===== 1. Motor de Fundo da Aplicação (Constelação Cyber como na imagem) ===== */
 const BG={cv:null,ctx:null,w:0,h:0,pts:[],pulses:[],ptr:{x:-999,y:-999},gridY:0,mode:'normal'};
 function initAppBg(){
  BG.cv=$('#appBg');if(!BG.cv)return;
@@ -571,6 +599,7 @@ function initAppBg(){
 function bgPulse(x,y){BG.pulses.push({x:x??BG.w/2,y:y??BG.h/2,r:6,a:.55})}
 function syncBgMode(){
  try{const s=S();BG.mode=s.gl>ATR_DIAS?'atrophy':dlAct()?'deload':s.mult?'streak':'normal'}catch(e){}
+ if(typeof syncHeroMode==='function')syncHeroMode();
 }
 function renderAppBg(){
  const{ctx,w,h,pts,pulses,ptr,mode}=BG;if(!ctx)return;
@@ -625,10 +654,168 @@ function renderAppBg(){
  requestAnimationFrame(renderAppBg);
 }
 
+/* ===== 2. Motor de Aura Interativa Exclusivo do Quadrado do Herói ("Aura do Titã") ===== */
+const HA={cv:null,ctx:null,w:360,h:540,pts:[],pulses:[],ptr:{x:-999,y:-999,down:false},gridOff:0,mode:'normal',tick:0,running:false};
+
+function mkHeroPt(w,h,mode,x,y,burst){
+ const isStr=mode==='streak',isAtr=mode==='atrophy',isDl=mode==='deload';
+ const cols=isAtr?['#ff4d6d','#ff8fa3','#c9184a']:isDl?['#ffd166','#ffb703','#39ff88']:isStr?['#39ff88','#ffcc33','#ff9a3c','#7dffb3']:['#39ff88','#10b981','#7dffb3'];
+ const isEdge=!burst&&Math.random()<.72;
+ const px=x??(isEdge?(Math.random()<.5?Math.random()*75:w-Math.random()*75):Math.random()*w);
+ return{
+  x:px,
+  y:y??Math.random()*h,
+  r:burst?(Math.random()*2.6+1):(Math.random()*(isStr?3.1:2.3)+1),
+  vx:burst?(Math.random()-.5)*4.5:(Math.random()-.5)*(isAtr?1.2:.4),
+  vy:burst?(Math.random()-.5)*4.5:isAtr?(Math.random()*1.4+.45):-(Math.random()*(isStr?2.3:isDl?.38:.9)+.3),
+  a:Math.random()*.7+.2,
+  c:cols[Math.floor(Math.random()*cols.length)],
+  phase:Math.random()*Math.PI*2,
+  life:burst?36:null
+ };
+}
+
+function syncHeroMode(){
+ try{
+  const s=S();
+  const next=s.gl>ATR_DIAS?'atrophy':dlAct()?'deload':s.mult?'streak':'normal';
+  if(HA.mode!==next){HA.mode=next;HA.pts=[]}
+ }catch(e){}
+}
+
+function heroPulse(x,y){
+ HA.pulses.push({x:x??HA.w/2,y:y??HA.h/2,r:6,a:.75});
+}
+
+function bindHeroCanvas(){
+ const cv=$('#heroAuraCv');if(!cv||HA.cv===cv)return;
+ HA.cv=cv;HA.ctx=cv.getContext('2d');
+ cv.width=HA.w;cv.height=HA.h;HA.pts=[];
+ const getPos=e=>{const r=cv.getBoundingClientRect();return{x:(e.clientX-r.left)/r.width*HA.w,y:(e.clientY-r.top)/r.height*HA.h}};
+ cv.addEventListener('pointermove',e=>{const p=getPos(e);HA.ptr.x=p.x;HA.ptr.y=p.y});
+ cv.addEventListener('pointerdown',e=>{
+  const p=getPos(e);HA.ptr.x=p.x;HA.ptr.y=p.y;HA.ptr.down=true;
+  heroPulse(p.x,p.y);
+  for(let i=0;i<10;i++)HA.pts.push(mkHeroPt(HA.w,HA.h,HA.mode,p.x,p.y,true));
+ });
+ cv.addEventListener('pointerup',()=>{HA.ptr.down=false});
+ cv.addEventListener('pointerleave',()=>{HA.ptr.x=-999;HA.ptr.y=-999;HA.ptr.down=false});
+}
+
+function initHeroAura(){
+ if(HA.running)return;
+ HA.running=true;
+ requestAnimationFrame(renderHeroAura);
+}
+
+function renderHeroAura(){
+ HA.tick++;
+ if(V==='h'){
+  bindHeroCanvas();
+  const{ctx,w,h,pts,pulses,ptr,mode}=HA;
+  if(ctx){
+   ctx.clearRect(0,0,w,h);
+   const pal=mode==='atrophy'?{main:'#ff4d6d',sec:'255,77,109'}
+            :mode==='deload' ?{main:'#ffd166',sec:'255,209,102'}
+            :mode==='streak' ?{main:'#39ff88',sec:'57,255,136',spark:'#ffcc33'}
+            :                 {main:'#39ff88',sec:'57,255,136'};
+
+   const target=mode==='streak'?52:mode==='deload'?20:mode==='atrophy'?38:32;
+   while(pts.length<target)pts.push(mkHeroPt(w,h,mode));
+
+   // 1. Grelha tática subtil em perspetiva no fundo do quadrado do Herói
+   const spd=mode==='streak'?.75:mode==='deload'?.15:mode==='atrophy'?.3:.35;
+   HA.gridOff=(HA.gridOff+spd)%36;
+   const hz=h*0.68;
+   ctx.strokeStyle=`rgba(${pal.sec},${mode==='streak'?0.18:0.12})`;
+   ctx.lineWidth=1;
+   ctx.beginPath();
+   for(let i=-6;i<=6;i++){ctx.moveTo(w/2+i*18,hz);ctx.lineTo(w/2+i*85,h)}
+   for(let j=0;j<7;j++){
+    const t=((j*36+HA.gridOff)/252)**1.6;
+    const y=hz+t*(h-hz);
+    if(y<=h){ctx.moveTo(0,y);ctx.lineTo(w,y)}
+   }
+   ctx.stroke();
+
+   // 2. Pedestal e anéis de energia aos pés do Herói
+   const baseG=ctx.createRadialGradient(w/2,h*.92,6,w/2,h*.9,w*.55);
+   baseG.addColorStop(0,`rgba(${pal.sec},0.5)`);
+   if(mode==='streak')baseG.addColorStop(0.45,'rgba(255,204,51,0.25)');
+   baseG.addColorStop(1,'transparent');
+   ctx.fillStyle=baseG;ctx.fillRect(0,0,w,h);
+
+   ctx.save();
+   ctx.translate(w/2,h*.9);ctx.scale(1,0.25);
+   for(let r=0;r<2;r++){
+    ctx.beginPath();
+    ctx.arc(0,0,70+r*36+Math.sin(HA.tick*.05+r)*5,0,Math.PI*2);
+    ctx.strokeStyle=r===1&&mode==='streak'?'rgba(255,204,51,0.5)':`rgba(${pal.sec},0.42)`;
+    ctx.lineWidth=2.2;ctx.stroke();
+   }
+   ctx.restore();
+
+   // 3. Luz reativa ao toque/rato dentro do quadrado do Herói
+   if(ptr.x>0){
+    const spot=ctx.createRadialGradient(ptr.x,ptr.y,2,ptr.x,ptr.y,110);
+    spot.addColorStop(0,`rgba(${pal.sec},0.28)`);
+    spot.addColorStop(1,'transparent');
+    ctx.fillStyle=spot;ctx.fillRect(0,0,w,h);
+   }
+
+   // 4. Ondas de energia (Pulses) ao tocar no quadrado
+   for(let i=pulses.length-1;i>=0;i--){
+    const p=pulses[i];p.r+=3.8;p.a*=.92;
+    if(p.a<.02){pulses.splice(i,1);continue}
+    ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+    ctx.strokeStyle=mode==='streak'&&i%2===0?`rgba(255,204,51,${p.a})`:`rgba(${pal.sec},${p.a})`;
+    ctx.lineWidth=2;ctx.stroke();
+   }
+
+   // 5. Partículas de Mana / Faíscas / Atrofia
+   for(let i=pts.length-1;i>=0;i--){
+    const p=pts[i];
+    const glitch=mode==='atrophy'?(Math.random()-.5)*2.4:Math.sin(HA.tick*.04+p.phase)*.35;
+    p.x+=p.vx+glitch;
+    p.y+=p.vy;
+
+    const dx=p.x-ptr.x,dy=p.y-ptr.y,d=Math.hypot(dx,dy);
+    if(d<85&&d>1){
+     const dir=ptr.down?-1.3:1.9;
+     p.x+=(dx/d)*dir;p.y+=(dy/d)*dir;
+    }
+
+    if(p.life!=null){
+     p.life--;p.a*=.93;
+     if(p.life<=0){pts.splice(i,1);continue}
+    }else{
+     if(p.y<-15){p.y=h+10;p.x=Math.random()*w}
+     if(p.y>h+15){p.y=-10;p.x=Math.random()*w}
+     if(p.x<-10)p.x=w+10;if(p.x>w+10)p.x=-10;
+    }
+
+    ctx.beginPath();
+    if(mode==='streak'&&!p.life){
+     ctx.ellipse(p.x,p.y,p.r*.85,p.r*2.2,0,0,Math.PI*2);
+    }else{
+     ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+    }
+    ctx.fillStyle=p.c;ctx.globalAlpha=p.a;
+    ctx.shadowBlur=10;ctx.shadowColor=p.c;
+    ctx.fill();
+   }
+   ctx.globalAlpha=1;ctx.shadowBlur=0;
+  }
+ }
+ requestAnimationFrame(renderHeroAura);
+}
+
 function R(){if(ch){ch.destroy();ch=null}if(rch){rch.destroy();rch=null}
- $('#nav').innerHTML=[['h','⚔️ Herói'],['t','🏋️ Treino'],['x','📋 Histórico'],['r','📅 Resumo'],['g','📈 Evolução'],['p','🎯 Provas &amp; Metas (300%)'],['c','🏆 Conquistas'],['d','💾 Dados']].map(([k,n])=>`<button onclick="V='${k}';R();scrollTo(0,0)" class="whitespace-nowrap px-3 py-2 rounded-lg text-sm ${V==k?'b':'g'}">${n}</button>`).join('');
- $('#m').innerHTML=({h:vH,t:vT,x:vX,r:vR,g:vG,p:vP,c:vC,d:vD})[V]();if(V=='g')dc();if(V=='h'){ap();drawRadar()}if(V=='t'){pm0=pmul();upd()}syncBgMode()}
-function boot(){initAppBg();wInit();try{const z=JSON.parse(localStorage.getItem('gymrpg-draft')||'null');if(z){draft=z.draft||{};dv=z.dv||''}}catch(e){}srt();chk();
+ syncBgMode();
+ const al=hasNotifAlert();
+ $('#nav').innerHTML=[['h','⚔️ Herói'],['n','🔔 Notificações'+(al?' •':'')],['t','🏋️ Treino'],['x','📋 Histórico'],['r','📅 Resumo'],['g','📈 Evolução'],['p','🎯 Provas &amp; Metas (300%)'],['c','🏆 Conquistas'],['d','💾 Dados']].map(([k,n])=>`<button onclick="V='${k}';R();scrollTo(0,0)" class="whitespace-nowrap px-3 py-2 rounded-lg text-sm ${V==k?'b':'g'}">${n}</button>`).join('');
+ $('#m').innerHTML=({h:vH,n:vN,t:vT,x:vX,r:vR,g:vG,p:vP,c:vC,d:vD})[V]();if(V=='g')dc();if(V=='h'){ap();drawRadar()}if(V=='t'){pm0=pmul();upd()}}
+function boot(){initAppBg();initHeroAura();wInit();try{const z=JSON.parse(localStorage.getItem('gymrpg-draft')||'null');if(z){draft=z.draft||{};dv=z.dv||''}}catch(e){}srt();chk();
  if(D.v!==33){if(D.ss.length)setTimeout(()=>toast('v3.3: XP recalculado com a fórmula de volume (Peso × Reps ÷ 10).'),300);D.v=33}
  save();R();onOpen();bkChk();rvChk();cloudInit();
  IDB.keys().then(ks=>{let n=0;(ks||[]).forEach(k=>{const[a,b]=String(k).split('|');if(b=='video'){VX.add(+a);delete VU[+a];n++}});if(n&&(V=='h'||V=='d'))R()}).catch(()=>{});
