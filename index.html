@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-PT"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>GYM RPG v3.12</title>
+<title>GYM RPG v3.15</title>
 <link rel="manifest" href="manifest.json"><meta name="theme-color" content="#061a10"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="GYM RPG"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><link rel="apple-touch-icon" href="icon-192.png"><link rel="icon" href="icon-192.png">
 <script>if('serviceWorker'in navigator&&/^https?:$/.test(location.protocol))addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))</script>
 <script>/* Login com Google (opcional): cola aqui o Client ID OAuth, ou preenche-o dentro do jogo em Dados. */window.GYM_CLOUD={clientId:'114168499507-k34ql5rbtp84toedtj87at8jrobjim6j.apps.googleusercontent.com'};</script>
@@ -36,10 +36,19 @@ body{background:#04120b;color:#e8fff1;font-family:'Chakra Petch',system-ui,sans-
 <script>
 const $=s=>document.querySelector(s),KEY='gymrpg5';
 const L={sup:'Supino',agach:'Agachamento',dead:'Deadlift',hip:'Hip Trust'},IC=['🛡️','🦵','⚓','🔥'];
-const DN=['Dia1','Dia1.2','Dia2','Dia 2.1','Dia3','Dia 3.1','Dia4','Dia 4.1'],LG={1:'Dia1',2:'Dia2',3:'Dia3',4:'Dia4',5:'Dia 3.1'};
+const DN=['Dia1','Dia1.2','Dia2','Dia 2.1','Dia3','Dia 3.1','Dia4','Dia 4.1','Corrida Fim de Semana'],LG={1:'Dia1',2:'Dia2',3:'Dia3',4:'Dia4',5:'Dia 3.1'};
 const dn=v=>{const q=nz(String(v||'')).replace(/\s/g,'');return DN.find(x=>nz(x).replace(/\s/g,'')==q)||LG[parseInt(q.replace(/\D/g,''))]||'Dia1'};
-const PL={'Dia1':['SUPINO','DESEN. OMBRO/ARL. PRESS','ELEVAÇÃO LATERAL','TRICEP PULLEY OVERHEAD','FLEXÕES DIAMANTE','SALTAR CORDA'],'Dia1.2':['ABDOMINAIS 1MIN/1MIN','FLEXÕES 2MIN/1MIN','BARRAS','PRANCHA'],'Dia2':['REMADA CURVADA','TRAPEZIO','REMADA UNILAT./PULL DOWN','ROSCA BICEP SENTADO','ROSCA MARTELO SENTADO','BARRAS','SALTAR CORDA'],'Dia 2.1':['SPRINTS 100M','BOX JUMP','SALTO COMPRIMENTO','TRAÇÃO'],'Dia3':['AGACHAMENTO','FRONT SQUATS','LEG EXTENSION/BULGAROS','MESA FLEXORA','PANTURRILHA/ABDUT','SALTAR CORDA'],'Dia 3.1':['COOPER','SERIES 400M','LUNGES'],'Dia4':['DEADLIFT','SUPINO INCLINADO','REMADA SUPINADA','AFUNDOS/HipTrust','PRANCHA/ABDU','BARRAS','SALTAR CORDA'],'Dia 4.1':['MARCHA']};
-/* Ranks / fases do avatar: [nível mínimo, nome] */
+const PL={
+ 'Dia1':['SUPINO','DESEN. OMBRO/ARL. PRESS','ELEVAÇÃO LATERAL','TRICEP PULLEY OVERHEAD','FLEXÕES DIAMANTE','SALTAR CORDA'],
+ 'Dia1.2':['ABDOMINAIS 1MIN/1MIN','FLEXÕES 2MIN/1MIN','BARRAS','PRANCHA'],
+ 'Dia2':['REMADA CURVADA','TRAPEZIO','REMADA UNILAT./PULL DOWN','ROSCA BICEP SENTADO','ROSCA MARTELO SENTADO','BARRAS','SALTAR CORDA'],
+ 'Dia 2.1':['SPRINTS 100M','BOX JUMP','SALTO COMPRIMENTO','TRAÇÃO'],
+ 'Dia3':['AGACHAMENTO','FRONT SQUATS','LEG EXTENSION/BULGAROS','MESA FLEXORA','PANTURRILHA/ABDUT','SALTAR CORDA'],
+ 'Dia 3.1':['COOPER','SERIES 400M','LUNGES'],
+ 'Dia4':['DEADLIFT','SUPINO INCLINADO','REMADA SUPINADA','AFUNDOS/HipTrust','PRANCHA/ABDU','BARRAS','SALTAR CORDA'],
+ 'Dia 4.1':['MARCHA'],
+ 'Corrida Fim de Semana':['CORRIDA']
+};
 const RK2=[[1,'Recruta Franzino'],[11,'Aspirante de Ferro'],[21,'Aprendiz Definido'],[31,'Atleta de Ginásio'],[41,'Guerreiro Musculado'],[51,'Gladiador Robusto'],[61,'Gladiador de Elite'],[71,'Campeão do Ferro'],[81,'Titã'],[91,'Colosso Fisiculturista']];
 const stg=lv=>RK2.filter(x=>x[0]<=lv).pop(),rank=lv=>stg(lv)[1],fase=lv=>RK2.indexOf(stg(lv))+1;
 const EMB='embutido';
@@ -57,28 +66,34 @@ const pn=s=>{const x=parseFloat(String(s).replace(',','.'));return isFinite(x)?x
 const fm=x=>String(Math.round(x*10)/10).replace('.',',');
 const rm=(w,r)=>r<1?0:w/(1.0278-.0278*Math.min(r,30));
 const BW=['lastro kg (opcional)','reps',(w,r)=>`${r} reps${w?` +${fm(w)} kg`:''}`];
-const CD={'saltar corda':['minutos','saltos',(w,r)=>`${fm(w)} min · ${r} saltos`],'series 400m':['tempo por série (s)','séries',(w,r)=>`${r} × 400 m a ${fm(w)} s`],'corrida continua':['km','minutos',(w,r)=>`${fm(w)} km em ${r} min`],'sprints 100m':['tempo (s)','sprints',(w,r)=>`${r} × 100 m a ${fm(w)} s`],'box jump':['altura (cm)','saltos',(w,r)=>`${r} × ${fm(w)} cm`],'salto comprimento':['distância (m)','saltos',(w,r)=>`${r} × ${fm(w)} m`],'cooper':['metros','minutos',(w,r)=>`${fm(w)} m em ${r} min`],'marcha':['km','minutos',(w,r)=>`${fm(w)} km em ${r} min`],'prancha':['—','segundos',(w,r)=>`${r} s`],'barras':BW,'flexoes diamante':BW,'abdominais 1min/1min':BW,'flexoes 2min/1min':BW};
+const CD={
+ 'corrida':['km','minutos',(w,r)=>`${fm(w)} km em ${r} min`],
+ 'saltar corda':['minutos','saltos',(w,r)=>`${fm(w)} min · ${r} saltos`],
+ 'series 400m':['tempo por série (s)','séries',(w,r)=>`${r} × 400 m a ${fm(w)} s`],
+ 'corrida continua':['km','minutos',(w,r)=>`${fm(w)} km em ${r} min`],
+ 'sprints 100m':['tempo (s)','sprints',(w,r)=>`${r} × 100 m a ${fm(w)} s`],
+ 'box jump':['altura (cm)','saltos',(w,r)=>`${r} × ${fm(w)} cm`],
+ 'salto comprimento':['distância (m)','saltos',(w,r)=>`${r} × ${fm(w)} m`],
+ 'cooper':['metros','minutos',(w,r)=>`${fm(w)} m em ${r} min`],
+ 'marcha':['km','minutos',(w,r)=>`${fm(w)} km em ${r} min`],
+ 'prancha':['—','segundos',(w,r)=>`${r} s`],
+ 'barras':BW,'flexoes diamante':BW,'abdominais 1min/1min':BW,'flexoes 2min/1min':BW
+};
 const cd=n=>CD[nz(n)],car=n=>{const c=cd(n);return!!c&&c!==BW};
 const td=()=>new Date(Date.now()-new Date().getTimezoneOffset()*6e4).toISOString().slice(0,10);
 const fd=d=>d.slice(8)+'/'+d.slice(5,7)+'/'+d.slice(2,4);
-/* EX(d) inclui os exercícios base + os exercícios extra personalizados (D.cx) */
 const EX=d=>(PL[d]||[]).concat((D.cx&&D.cx[d])||[]);
 function toast(t){const e=document.createElement('div');e.className='c on text-[#7dffb3] text-sm';e.textContent=t;$('#t').append(e);setTimeout(()=>e.remove(),4200)}
 function srt(){D.ss.sort((a,b)=>a.d<b.d?-1:a.d>b.d?1:0);const z=new Set;D.ss=D.ss.filter(s=>{const k=JSON.stringify(s);return z.has(k)?0:z.add(k)})}
 
-/* ================= v3.3 · XP por volume, atrofia e streak ================= */
-const XP_DIV=10;                         // XP ganho = Σ(Peso × Repetições) ÷ 10
-const ATR_DIAS=7,ATR_XP=0;               // Atrofia: −0,5% do XP por cada dia sem treino além de 7 (máx. 25%)
-const STK_META=4,STK_GAP=3,STK_MULT=1.05; // Streak: ≥4 dias de treino seguidos, no máx. 2 dias de pausa · bónus +5%
+const XP_DIV=10;
+const ATR_DIAS=7,ATR_XP=0;
+const STK_META=4,STK_GAP=3,STK_MULT=1.05;
 const DAY=864e5,dnum=d=>Math.round(Date.parse(d)/DAY),wkn=n=>Math.floor((n+3)/7),dstr=n=>new Date(n*DAY).toISOString().slice(0,10);
 function volE(e,kg){const c=cd(e.n);if(c&&c!==BW)return 0;const bw=c===BW?(+kg||+D.p.kg||0):0;return e.s.reduce((a,[w,r])=>a+(bw+(+w||0))*(+r||0),0)}
 
-/* Curva de nível: XP acumulado = 30 × (nível − 1)^2,8
-   TXP ajustado para somar exatamente +100, +250, +500, +900 e +1500 XP acumulados nas metas de 100% a 300% */
 const XA=30,XP2=2.8,XM=100,fx=n=>Math.round(n).toLocaleString('pt-PT'),CXP=L=>XA*(L-1)**XP2,LV=x=>Math.min(XM,Math.floor((x/XA)**(1/XP2)+1e-9)+1),TXP={100:100,150:150,200:250,250:400,300:600};
 
-/* Melhores marcas para as provas, lidas dos registos.
-   Nos Sprints (c80): se o tempo inserido for < 12,2s assume medição direta aos 80m; se >= 12,2s converte dos 100m (×0,8). */
 const PD=['Dia1.2','Dia 2.1','Dia 3.1','Dia 4.1'];
 function PBU(pb,name,w,r,d){if(!PD.includes(d))return;const n=nz(name),u=(k,v,mx,t)=>{if(v>0&&(pb[k]==null||(mx?v>pb[k]:v<pb[k]))){pb[k]=v;if(t)pb['~'+k]=t}};
  if(n=='barras'||n=='abdominais 1min/1min'||n=='flexoes 2min/1min')u(n,r,1);
@@ -88,8 +103,6 @@ function PBU(pb,name,w,r,d){if(!PD.includes(d))return;const n=nz(name),u=(k,v,mx
  else if(n=='cooper'&&r>0)u(n,w*12/r,1,`${fm(w)} m em ${r} min`);
  else if(n=='marcha'&&w>0&&r>0)u(n,r*60*15/w,0,`${fm(w)} km em ${r} min`)}
 
-/* Estatísticas, XP e nível. O XP é recalculado do histórico por ordem cronológica:
-   + volume ÷ 10 (× 1,05 se o streak estiver ativo nesse dia) + bónus das Provas & Metas − atrofia nas pausas > 7 dias (máx. 25%). */
 function S(){
  const b={sup:0,agach:0,dead:0,hip:0},h={sup:{},agach:{},dead:{},hip:{}},W={},M={},Y={},pb={};let vol=0,mv=0,ms=0;const Z={sup:{},agach:{},dead:{},hip:{}},QW={},rc={};
  D.ss.forEach(s=>{let v=0,n=0;
@@ -98,13 +111,12 @@ function S(){
   const wk=wkn(dnum(s.d)),mo=+s.d.slice(0,4)*12+ +s.d.slice(5,7);
   W[wk]=(W[wk]||0)+1;M[mo]=(M[mo]||0)+1;(Y[wk]=Y[wk]||new Set).add(s.day)});
  const byD={};D.ss.forEach(s=>(byD[s.d]=byD[s.d]||[]).push(s));
- const sx=new Map,LOG=[];let xp=+D.px||0,prov=0,rec=0,last=null,wc={},cn=0;
- const sw=w=>{let k=(wc[w]||0)>=STK_META?w:w-1,n=0;while((wc[k]||0)>=STK_META){n++;k--}return n};
+ const sx=new Map,LOG=[];let xp=+D.px||0,prov=0,rec=0,last=null,cn=0;
  const atrof=g=>{if(!(g>ATR_DIAS))return null;const p=xp*Math.min(.25,(g-ATR_DIAS)*.005);xp-=p;rec+=p;return{dias:g,xp:p}};
  Object.keys(byD).sort().forEach(d=>{const n=dnum(d),ok=isFinite(n);let st=0;
   if(ok){if(last!=null){const g0=eg(last,n),a=atrof(g0);if(a)LOG.push({...a,d});cn=g0>STK_GAP?1:cn+1}else cn=1;st=cn>=STK_META?cn:0}
   const m=st>=1?STK_MULT:1;
-  byD[d].forEach(s=>{const v=s.ex.reduce((a,e)=>a+volE(e,swt(s)),0);let pr=0;s.ex.forEach(e=>{const k=mk(e.n);if(!k)return;const o=Math.max(...e.s.map(([w,r])=>r<=10?rm(w,r):0));if(rc[k]&&o>rc[k]*1.0001)pr=1;rc[k]=Math.max(rc[k]||0,o)});const g=Math.round(s.ex.reduce((a,e)=>a+xpE(e,swt(s)),0)*(pr?1.05:1)*m);xp+=g;if(rec>0){const q=Math.min(rec,g*.5);xp+=q;rec-=q}const qk=wkn(n),Q=QW[qk]=QW[qk]||{f:new Set,p:0,d:0};if(['Dia1','Dia2','Dia3','Dia4'].includes(s.day))Q.f.add(s.day);if(pr)Q.p=1;if(s.day=='Dia 3.1')Q.d=1;sx.set(s,{v,b:v/XP_DIV,m,x:g,st,pr});s.ex.forEach(e=>e.s.forEach(([w2,r])=>PBU(pb,e.n,w2,r,s.day)))});
+  byD[d].forEach(s=>{const v=s.ex.reduce((a,e)=>a+volE(e,swt(s)),0);let pr=0;s.ex.forEach(e=>{const k=mk(e.n);if(!k)return;const o=Math.max(...e.s.map(([w,r])=>r<=10?rm(w,r):0));if(rc[k]&&o>rc[k]*1.0001)pr=1;rc[k]=Math.max(rc[k]||0,o)});const g=Math.round(s.ex.reduce((a,e)=>a+xpE(e,swt(s)),0)*(pr?1.05:1)*m);xp+=g;if(rec>0){const q=Math.min(rec,g*.5);xp+=q;rec-=q}const qk=wkn(n),Q=QW[qk]=QW[qk]||{f:new Set,p:0,d:0};if(['Dia1','Dia2','Dia3','Dia4'].includes(s.day))Q.f.add(s.day);if(pr)Q.p=1;if(s.day=='Dia 3.1'||s.day=='Corrida Fim de Semana')Q.d=1;sx.set(s,{v,b:v/XP_DIV,m,x:g,st,pr});s.ex.forEach(e=>e.s.forEach(([w2,r])=>PBU(pb,e.n,w2,r,s.day)))});
   const pv=PV.reduce((a,x)=>a+(pb[x.id]?TIERS.filter(q=>pf(x,pb[x.id])>=q).reduce((z,q)=>z+TXP[q],0):0),0);xp+=pv-prov;prov=pv;
   if(ok)last=n});
  let qx=0;Object.values(QW).forEach(q=>{qx+=(q.f.size>=3?150:0)+(q.p?150:0)+(q.d?100:0)});xp+=qx;const T=dnum(td()),gl=last==null?null:eg(last,T),atr=last==null?null:atrof(gl);
@@ -134,7 +146,6 @@ Object.keys(L).forEach((k,ki)=>TH.forEach((t,i)=>B.push({id:k+t,c:'Força Bruta'
 function chk(){const s=S(),nw=[];B.forEach(b=>{if(!D.u[b.id]&&b.f(s)){D.u[b.id]=td();nw.push(b)}});return nw}
 const nb=nw=>nw.length>3?toast('🏆 '+nw.length+' novas conquistas!'):nw.forEach(b=>toast('🏆 '+b.n));
 
-/* Avatar (ilustração provisória, só usada se uma imagem falhar) */
 const bf=()=>{const{kg,cm}=D.p;if(!kg||!cm)return .4;return Math.min(1,Math.max(0,(kg/((cm/100)**2)-19)/16))};
 const mf=s=>Math.min(1,.8*Math.min(1,(s.b.sup+s.b.agach+s.b.dead+s.b.hip)/((D.p.kg||75)*8.5))+.2*Math.min(1,(s.lv-1)/40));
 function av(v,b,m){
@@ -144,39 +155,23 @@ function av(v,b,m){
  const P=(p,f,o=1)=>`<path d="${p}" fill="${f}" fill-opacity="${o}"/>`,Ls=(p,o,k=1.2)=>`<path d="${p}" fill="none" stroke="#2a1208" stroke-opacity="${o}" stroke-width="${k}" stroke-linecap="round"/>`;
  let r=P(lb(X(hp*.55),190,th*.85,X(hp*.5+2),262,th*.5,2+3*m),K)+P(lb(X(hp*.5+2),262,th*.5,X(hp*.42+3),316,4.2,F?1.5+2*m:2+5.5*m),K)+`<ellipse cx="${X(hp*.42+4)}" cy="322" rx="7" ry="4" fill="#27272a" stroke="#10b981" stroke-opacity=".5"/>`;
  r+=P(`M100 60Q${X(sw*.5)} 60 ${X(sw)} 72L${X(sw-1)} 100Q${X(w+3)} 130 ${X(w)} 168Q${X(hp)} 176 ${X(hp)} 200L100 204Z`,K);
- if(F){
-  r+=P(`M101 78Q${X(sw*.5)} 72 ${X(sw*.9)} 82Q${X(sw*.8)} 106 ${X(4)} 104Z`,H,.1+.25*d)+Ls(`M${X(4)} 104Q${X(sw*.6)} 109 ${X(sw*.84)} 95`,.25+.5*d,1.6)+Ls(`M101 67Q${X(sw*.5)} 64 ${X(sw*.9)} 71`,.3);
-  for(const y of[110,125,140])r+=`<rect x="102" y="${y}" width="${N(w*.42)}" height="11" rx="3.5" fill="${H}" fill-opacity="${.08+.2*d}" stroke="#2a1208" stroke-opacity="${.12+.5*d}"/>`;
-  r+=Ls(`M${X(sw*.8)} 98l-6 5M${X(sw*.78)} 107l-7 5M${X(sw*.74)} 116l-7 5`,.05+.35*d)+Ls(`M${X(w)} 152Q${X(w*.5)} 164 101 172`,.1+.5*d)+Ls(`M${X(hp*.55+th*.6)} 204Q${X(hp*.55+th*.75)} 234 ${X(hp*.5+th*.3)} 258`,.15+.5*d,1.4)+P(`M${X(hp*.28)} 252Q${X(hp*.4)} 244 ${X(hp*.5)} 262Q${X(hp*.28)} 268 ${X(hp*.28)} 252Z`,H,.12+.2*m);
- }else{
-  r+=P(`M100 58Q${X(sw*.5)} 60 ${X(sw*.92)} 73Q${X(sw*.6)} 92 100 124Z`,H,.1+.25*m)+Ls(`M100 124Q${X(sw*.6)} 92 ${X(sw*.92)} 73`,.2+.5*d)
-   +P(`M${X(sw*.95)} 86Q${X(sw*1.02)} 112 ${X(w)} 160Q${X(w*.5)} 150 ${X(6)} 128Q${X(sw*.5)} 120 ${X(sw*.85)} 90Z`,H,.06+.2*m)+Ls(`M${X(sw*.95)} 86Q${X(sw*1.02)} 112 ${X(w)} 160M${X(6)} 128Q${X(sw*.5)} 120 ${X(sw*.85)} 90`,.15+.5*d)
-   +Ls(`M${X(sw*.5)} 82Q${X(sw*.8)} 90 ${X(sw*.9)} 98M${X(sw*.48)} 94Q${X(sw*.68)} 100 ${X(sw*.8)} 108`,.15+.5*d)
-   +`<ellipse cx="${X(8)}" cy="148" rx="${N(4+2*m)}" ry="22" fill="${H}" fill-opacity="${.06+.2*m}"/>`+Ls(`M${X(5)} 128Q${X(10)} 148 ${X(7)} 170`,.15+.5*d)
-   +Ls(`M${X(hp*.55+th*.3)} 232Q${X(hp*.55+th*.45)} 250 ${X(hp*.5)} 262`,.15+.5*d,1.4)+`<ellipse cx="${X(hp*.55)}" cy="240" rx="${N(th*.45)}" ry="22" fill="${H}" fill-opacity="${.05+.18*m}"/>`
-   +Ls(`M${X(hp*.42+2)} 272Q${X(hp*.42+4)} 292 ${X(hp*.42+3)} 306`,.2+.4*d);
- }
  r+=P(`M100 168L${X(w+1)} 168Q${X(hp+2)} 176 ${X(hp+2)} 200L${X(e1)} 232L100 232Z`,'#1c1c20')+`<path d="M100 170H${X(w+1)}M${X(hp+1)} 182L${X(e1-1)} 230" fill="none" stroke="#10b981" stroke-opacity=".8" stroke-width="1.4"/>`;
- if(!F)r+=`<ellipse cx="${X(hp*.5)}" cy="196" rx="${N(hp*.55+b*2)}" ry="${N(17+3*m)}" fill="#34343b" fill-opacity="${N(.5+.3*m)}" stroke="#10b981" stroke-opacity=".3"/>`;
  r+=P(lb(X(sw+4),78,ua+2,X(sw+9),128,ua*.78,1.5+3.5*m),K)+P(lb(X(sw+9),128,ua*.78,X(sw+8),176,fa*.62,1+2*m),K)+`<ellipse cx="${X(sw+8)}" cy="186" rx="${N(fa*.7)}" ry="10" fill="${K}"/><ellipse cx="${X(sw+4)}" cy="78" rx="${N(ua+3)}" ry="15" fill="${K}"/>`;
- r+=F?P(`M${X(sw+6)} 90Q${X(sw+10)} 102 ${X(sw+6)} 116Q${X(sw+1)} 104 ${X(sw+6)} 90Z`,H,.12+.25*m)+Ls(`M${X(sw-3)} 84Q${X(sw+3)} 92 ${X(sw+4)} 102`,.2+.5*d):Ls(`M${X(sw+8)} 96Q${X(sw+1)} 108 ${X(sw+7)} 122`,.2+.5*d)+P(`M${X(sw+9)} 92Q${X(sw+13)} 106 ${X(sw+8)} 120Q${X(sw+4)} 106 ${X(sw+9)} 92Z`,H,.08+.2*m);
  const ct=F?Ls('M100 106V170',.1+.45*d)+Ls('M100 70V100',.2):Ls('M100 62V202',.25+.45*d,1.4);
- const bl=F?`<ellipse cx="100" cy="146" rx="${N(w*.95)}" ry="23" fill="#c58a5f" fill-opacity="${N(Math.max(0,b-.3)*(1-.7*m))}"/>`:'';
- const hd=P(lb(100,44,6.5+2*m,100,62,8+3*m,0),K)+`<ellipse cx="100" cy="30" rx="12.5" ry="15.5" fill="${K}"/><ellipse cx="87" cy="31" rx="2.5" ry="4" fill="${K}"/><ellipse cx="113" cy="31" rx="2.5" ry="4" fill="${K}"/>`+(F?`<path d="M87.5 28Q88 12 100 12Q112 12 112.5 28Q108 20 100 20Q92 20 87.5 28Z" fill="#1a1a1d"/><path d="M92 29h5M103 29h5M100 31v6M96 41h8" stroke="#2a1208" stroke-opacity=".65" stroke-width="1.3" stroke-linecap="round"/>`:`<path d="M87.5 32Q86 12 100 12Q114 12 112.5 32Q108 41 100 41Q92 41 87.5 32Z" fill="#1a1a1d"/>`);
- return`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 330" width="200" height="330"><defs><linearGradient id="sk"><stop offset="0" stop-color="#dba478"/><stop offset=".55" stop-color="#c58a5f"/><stop offset="1" stop-color="#7a4a31"/></linearGradient><radialGradient id="gl"><stop offset="0" stop-color="#10b981" stop-opacity=".28"/><stop offset="1" stop-color="#10b981" stop-opacity="0"/></radialGradient></defs><circle cx="100" cy="170" r="140" fill="url(#gl)"/><ellipse cx="100" cy="327" rx="64" ry="5" fill="#10b981" fill-opacity=".3"/><g id="r">${r}</g><use href="#r" transform="translate(200 0) scale(-1 1)"/>${bl}${ct}${hd}</svg>`}
+ const hd=P(lb(100,44,6.5+2*m,100,62,8+3*m,0),K)+`<ellipse cx="100" cy="30" rx="12.5" ry="15.5" fill="${K}"/>`;
+ return`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 330" width="200" height="330"><defs><linearGradient id="sk"><stop offset="0" stop-color="#dba478"/><stop offset=".55" stop-color="#c58a5f"/><stop offset="1" stop-color="#7a4a31"/></linearGradient><radialGradient id="gl"><stop offset="0" stop-color="#10b981" stop-opacity=".28"/><stop offset="1" stop-color="#10b981" stop-opacity="0"/></radialGradient></defs><circle cx="100" cy="170" r="140" fill="url(#gl)"/><ellipse cx="100" cy="327" rx="64" ry="5" fill="#10b981" fill-opacity=".3"/><g id="r">${r}</g><use href="#r" transform="translate(200 0) scale(-1 1)"/>${ct}${hd}</svg>`}
 const fb=v=>'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(av(v=='frente'?'f':'b',bf(),mf(S())));
-const asrc=(v,lv)=>{const k=stg(lv)[0];return IM[k+'|'+v]||(avatarStages[k]||{})[v]||fb(v)};
+const asrc=(v,lv)=>{const k=stg(lv)[0];return IM[k+'|'+v]||((typeof avatarStages!=='undefined'&&avatarStages[k])||{})[v]||fb(v)};
 
-/* Vídeos do avatar: embutidos (VEMB), URL em avatarVideos, ou carregados no separador Dados */
 const IDB=(()=>{let p;const op=()=>p=p||new Promise((ok,ko)=>{try{const r=indexedDB.open('gymrpg-media',1);r.onupgradeneeded=()=>r.result.createObjectStore('m');r.onsuccess=()=>ok(r.result);r.onerror=()=>ko(r.error)}catch(e){ko(e)}});
  const tx=(md,f)=>op().then(db=>new Promise((ok,ko)=>{const t=db.transaction('m',md),q=f(t.objectStore('m'));t.oncomplete=()=>ok(q&&q.result);t.onerror=t.onabort=()=>ko(t.error)}));
  return{get:k=>tx('readonly',s=>s.get(k)),put:(k,v)=>tx('readwrite',s=>s.put(v,k)),del:k=>tx('readwrite',s=>s.delete(k)),keys:()=>tx('readonly',s=>s.getAllKeys())}})();
 const VU={},VX=new Set,VBAD=new Set;
 const b64u=(b,t)=>{const s=atob(b),a=new Uint8Array(s.length);for(let i=0;i<s.length;i++)a[i]=s.charCodeAt(i);return URL.createObjectURL(new Blob([a],{type:t}))};
-const hasV=k=>!VBAD.has(k)&&(VX.has(k)||(avatarVideos[k]===EMB?!!VEMB[k]:!!avatarVideos[k]));
+const hasV=k=>!VBAD.has(k)&&(VX.has(k)||(avatarVideos[k]===EMB?(typeof VEMB!=='undefined'&&!!VEMB[k]):!!avatarVideos[k]));
 async function vsrc(k){if(k in VU)return VU[k];let u=null;
  if(VX.has(k))try{const x=await IDB.get(k+'|video');if(x)u=typeof x=='string'?x:URL.createObjectURL(x)}catch(e){}
- if(!u){const a=avatarVideos[k];u=a===EMB?(VEMB[k]?b64u(VEMB[k],'video/mp4'):null):a||null}
+ if(!u){const a=avatarVideos[k];u=a===EMB?((typeof VEMB!=='undefined'&&VEMB[k])?b64u(VEMB[k],'video/mp4'):null):a||null}
  return VU[k]=u}
 function vis(){const v=$('#iV');if(!v)return;const hv=hasV(CK),f=face=='video'&&!hv?'frente':face;
  $('#iF').style.opacity=f=='frente'?1:0;$('#iB').style.opacity=f=='costas'?1:0;v.style.opacity=f=='video'?1:0;
@@ -197,12 +192,11 @@ function ai(){const st=+$('#xs').value,ty=$('#xv').value,k=st+'|'+ty,u=$('#xu').
  else if(u)put(u);else toast('Escolhe um ficheiro ou cola um URL.')}
 function ar(){const l=+$('#xs').value;['frente','costas'].forEach(v=>delete IM[l+'|'+v]);IMS();IDB.del(l+'|video').catch(()=>{});VX.delete(l);VBAD.delete(l);delete VU[l];toast('Fase '+fn(l)+' reposta');R()}
 const vAI=()=>`<div class="c space-y-2"><b class="text-[#39ff88]">Vídeos e imagens do avatar</b>
- <p class="text-xs text-zinc-400">As fases 1–4 já têm vídeo; as fases 5–10 mostram as fotos até juntares os vídeos. Escolhe a fase, o tipo e o ficheiro (vídeo MP4 ou imagem) — fica guardado só neste browser. Também aceita um URL depois de alojares o jogo.</p>
+ <p class="text-xs text-zinc-400">As fases 1–4 já têm vídeo; as fases 5–10 mostram as fotos até juntares os vídeos. Escolhe a fase, o tipo e o ficheiro (vídeo MP4 ou imagem).</p>
  <div class="grid grid-cols-2 gap-2"><select id="xs" class="i">${RK2.map(([l,n],i)=>`<option value="${l}">Fase ${i+1} · Nv ${l}+ · ${n}${hasV(l)?' 🎬':''}</option>`).join('')}</select><select id="xv" class="i"><option value="video">Vídeo</option><option value="frente">Foto de frente</option><option value="costas">Foto de costas</option></select></div>
  <input id="xu" class="i" placeholder="URL (opcional)"><input type="file" accept="video/*,image/*" id="xf" class="text-xs">
  <div class="flex gap-2"><button class="b" onclick="ai()">Guardar</button><button class="g" onclick="ar()">Repor fase</button></div></div>`;
 
-/* ===== Gráfico Radar de Atributos do Herói (STR, END, AGI, DEX, WIL) ===== */
 function getHeroStats(s){
  const pScore=id=>{const x=PV.find(q=>q.id===id);return x&&s.pb[id]?Math.min(100,pf(x,s.pb[id])/1.5):0};
  const avg=arr=>{const v=arr.filter(x=>x>0);return v.length?Math.round(v.reduce((a,b)=>a+b,0)/v.length):Math.round(Math.min(40,s.lv*0.8))};
@@ -228,27 +222,41 @@ function drawRadar(){
   type:'radar',
   data:{
    labels:['STR (Força)','END (Resistência)','AGI (Explosão)','DEX (Calistenia)','WIL (Disciplina)'],
-   datasets:[{
-    label:'Atributos',
-    data:[st.str,st.end,st.agi,st.dex,st.wil],
-    backgroundColor:'rgba(57, 255, 136, 0.22)',
-    borderColor:'#39ff88',
-    pointBackgroundColor:'#39ff88',
-    pointBorderColor:'#04210f',
-    pointHoverBackgroundColor:'#fff',
-    borderWidth:2,
-    pointRadius:3.5
-   }]
+   datasets:[{label:'Atributos',data:[st.str,st.end,st.agi,st.dex,st.wil],backgroundColor:'rgba(57, 255, 136, 0.22)',borderColor:'#39ff88',pointBackgroundColor:'#39ff88',pointBorderColor:'#04210f',pointHoverBackgroundColor:'#fff',borderWidth:2,pointRadius:3.5}]
   },
-  options:{
-   responsive:true,maintainAspectRatio:false,
-   scales:{r:{min:0,max:100,beginAtZero:true,angleLines:{color:'rgba(57,255,136,0.18)'},grid:{color:'rgba(255,255,255,0.1)'},pointLabels:{color:'#e8fff1',font:{family:'Chakra Petch',size:11,weight:'600'}},ticks:{display:false,stepSize:25}}},
-   plugins:{legend:{display:false}}
-  }
+  options:{responsive:true,maintainAspectRatio:false,scales:{r:{min:0,max:100,beginAtZero:true,angleLines:{color:'rgba(57,255,136,0.18)'},grid:{color:'rgba(255,255,255,0.1)'},pointLabels:{color:'#e8fff1',font:{family:'Chakra Petch',size:11,weight:'600'}},ticks:{display:false,stepSize:25}}},plugins:{legend:{display:false}}}
  });
 }
 
-/* Vistas */
+/* Cartão de Corrida (Km Mensais e Anuais) */
+const MES=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+function vRunKm(){
+ const now=td(),ym=now.slice(0,7),yr=now.slice(0,4);
+ let mKm=0,yKm=0,mMin=0,yMin=0,mCnt=0,yCnt=0;
+ D.ss.forEach(s=>{if(!s.d)return;let sk=0,sm=0;
+  (s.ex||[]).forEach(e=>{const n=nz(e.n);
+   if(n==='corrida'||n==='corrida continua'||n==='cooper'){
+    (e.s||[]).forEach(([w,r])=>{const k=n==='cooper'?((+w||0)/1000):(+w||0);if(k>0){sk+=k;sm+=(+r||0)}})}
+  });
+  if(sk>0){if(s.d.slice(0,4)===yr){yKm+=sk;yMin+=sm;yCnt++}if(s.d.slice(0,7)===ym){mKm+=sk;mMin+=sm;mCnt++}}
+ });
+ const pace=(k,m)=>k>0&&m>0?`${Math.floor(m/k)}'${String(Math.round(((m/k)%1)*60)).padStart(2,'0')}"/km`:'—';
+ const mesNome=MES[+now.slice(5,7)-1]||'Mês';
+ return`<div class="c"><div class="flex justify-between items-center mb-2"><b class="text-[#39ff88]">🏃 Corrida · Km Acumulados</b><span class="text-xs text-zinc-400">${mesNome} &amp; ${yr}</span></div>
+  <div class="grid grid-cols-2 gap-2 text-center">
+   <div class="rounded-xl bg-black/30 border border-white/10 p-2.5">
+    <div class="text-[10px] uppercase tracking-wider text-zinc-400">📅 Este Mês (${mesNome})</div>
+    <div class="text-2xl font-bold text-[#39ff88] mt-0.5">${fm(mKm)} <span class="text-xs font-normal">km</span></div>
+    <div class="text-[11px] text-zinc-400 mt-0.5">${mCnt} ${mCnt===1?'corrida':'corridas'} · ritmo ${pace(mKm,mMin)}</div>
+   </div>
+   <div class="rounded-xl bg-black/30 border border-white/10 p-2.5">
+    <div class="text-[10px] uppercase tracking-wider text-zinc-400">🏆 Total Ano (${yr})</div>
+    <div class="text-2xl font-bold text-[#7dffb3] mt-0.5">${fm(yKm)} <span class="text-xs font-normal">km</span></div>
+    <div class="text-[11px] text-zinc-400 mt-0.5">${yCnt} ${yCnt===1?'corrida':'corridas'} · ${Math.round(yMin)} min totais</div>
+   </div>
+  </div></div>`;
+}
+
 const DS=['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
 const quando=g=>g==0?'hoje':g==1?'ontem':g<0?'data futura':`há ${g} dias`;
 function vStk(s){const T=dnum(td()),m0=wkn(T)*7-3,set=new Set(D.ss.map(x=>dnum(x.d))),on=s.mult;
@@ -264,11 +272,10 @@ function vStk(s){const T=dnum(td()),m0=wkn(T)*7-3,set=new Set(D.ss.map(x=>dnum(x
   <div class="flex gap-1 mt-3">${pips}</div>
   <div class="text-xs text-zinc-400 mt-2">${l1}</div>${l2?`<div class="text-xs text-zinc-400 mt-1">${l2}</div>`:''}${l3}</div>`}
 
-/* Separador Notificações (Descarga + Consistência/Streak + Missões da Semana) */
 function hasNotifAlert(){try{const s=S();return !!(dlAct()||dlSug()||(s.gl!=null&&s.gl>=ATR_DIAS-2))}catch(e){return false}}
 function vN(){
  const s=S(),b=dlBanner();
- return`<div class="c flex items-center justify-between"><b class="text-[#39ff88]">🔔 Centro de Notificações &amp; Estado</b><span class="text-xs text-zinc-400">Streak, Descarga e Missões</span></div>`
+ return`<div class="c flex items-center justify-between"><b class="text-[#39ff88]">🔔 Centro de Notificações &amp; Estado</b><span class="text-xs text-zinc-400">Arena, Streak e Missões</span></div>`
   +vDuo(s)
   +(b||`<div class="c text-xs text-zinc-400">🛌 <b class="text-[#e8fff1]">Semana de descarga:</b> Sem descarga ativa ou sugerida de momento (recomendada a cada 4 a 6 semanas).</div>`)
   +vStk(s)+vMiss(s);
@@ -278,7 +285,7 @@ function vH0(){const s=S(),p=D.p,ne=RK2.find(x=>x[0]>s.lv),mx=s.lv>=XM,cur=CXP(s
  const rk=stg(s.lv),r0=CXP(rk[0]),r1=ne?CXP(ne[0]):0,pr=ne?Math.min(100,Math.max(0,(s.xp-r0)/(r1-r0)*100)):100;
  const inf=p.kg?`${fm(p.kg)} kg${p.age?' · '+fm(p.age)+' anos':''} · ${fm(p.cm)} cm ✎`:'Definir perfil ✎';
  const mCol=BG.mode==='atrophy'?'255,77,109':BG.mode==='deload'?'255,209,102':BG.mode==='streak'?'255,204,51':'57,255,136';
- return`<div class="flex items-start justify-between gap-3"><div><h1 class="text-2xl font-bold text-[#39ff88]" style="text-shadow:0 0 14px #39ff8899">GYM RPG <span class="text-xs text-zinc-400 align-middle">v3.12</span></h1><div class="text-xs text-zinc-400">O Despertar do Titã</div></div><button class="text-right leading-tight" onclick="pe=!pe;R()"><div class="text-xs text-zinc-400">${inf}</div><div class="text-xs mt-1 font-semibold text-[#39ff88]/80">${s.t} · Nv ${s.lv}</div></button></div>
+ return`<div class="flex items-start justify-between gap-3"><div><h1 class="text-2xl font-bold text-[#39ff88]" style="text-shadow:0 0 14px #39ff8899">GYM RPG <span class="text-xs text-zinc-400 align-middle">v3.15</span></h1><div class="text-xs text-zinc-400">O Despertar do Titã</div></div><button class="text-right leading-tight" onclick="pe=!pe;R()"><div class="text-xs text-zinc-400">${inf}</div><div class="text-xs mt-1 font-semibold text-[#39ff88]/80">${s.t} · Nv ${s.lv}</div></button></div>
  ${pe||!p.kg?`<div class="c"><div class="grid grid-cols-3 gap-2 text-xs">${[['kg','Peso (kg)',p.kg],['cm','Altura (cm)',p.cm],['ag','Idade',p.age]].map(([k,n,v])=>`<label>${n}<input id="${k}" class="i mt-1" inputmode="decimal" value="${v?fm(v):''}"></label>`).join('')}</div><button class="b w-full mt-3" onclick="sp()">Guardar perfil</button></div>`:''}
  <div class="c text-center"><div class="flex items-end justify-between"><div class="text-left"><div class="text-xs text-zinc-400">Nível</div><div class="text-4xl font-bold text-[#39ff88]" style="text-shadow:0 0 16px #39ff8899">${s.lv}</div></div><div class="text-right"><div class="text-xs text-zinc-400">Rank · Fase ${fase(s.lv)}/10</div><div class="font-semibold">${s.t}</div></div></div>
  <div id="heroBox" class="hero-box relative mx-auto mt-3 w-full max-w-[360px] aspect-[2/3] rounded-2xl overflow-hidden border border-[#39ff88]/35" style="--aura-glow:rgba(${mCol},.55);--aura-bot:rgba(${mCol},.35);box-shadow:0 0 ${(18+pr*.42).toFixed(0)}px rgba(${mCol},${(.22+pr*.005).toFixed(2)})">
@@ -295,14 +302,15 @@ function vH0(){const s=S(),p=D.p,ne=RK2.find(x=>x[0]>s.lv),mx=s.lv>=XM,cur=CXP(s
   <div class="h-3.5 bg-white/10 rounded-full overflow-hidden mt-1"><div class="h-full rounded-full" style="width:${pr}%;background:linear-gradient(90deg,#1f9d55,#39ff88);box-shadow:0 0 14px #39ff88"></div></div>
   <div class="text-[11px] text-zinc-500 mt-1">${ne?`Faltam ${fx(r1-s.xp)} XP para a fase ${fase(ne[0])}`:'Fase final do avatar'}${rk[0]>1?` · margem antes de regredir de rank: ${fx(s.xp-r0)} XP`:''}</div>
  </div></div>
+ ${vRunKm()}
  ${vRadar(s)}
  <div class="grid grid-cols-2 gap-2">${Object.keys(L).map((k,i)=>`<div class="c"><div class="text-xl">${IC[i]}</div><div class="text-xs text-zinc-400">${L[k]} · 1RM</div><div class="text-2xl font-bold text-[#39ff88]">${s.b[k]?fm(s.b[k]):'—'}<span class="text-sm"> kg</span></div></div>`).join('')}</div>
- <p class="text-xs text-zinc-500">XP por treino = Σ(Peso × Repetições) ÷ 10. Nas barras, flexões e abdominais o Peso é o teu peso corporal + lastro; o cardio ganha XP pelas kcal estimadas. 🔥 Streak: ${STK_META} dias de treino seguidos, com no máximo ${STK_GAP-1} dias de pausa; com o streak ativo cada treino vale +5% XP. Atrofia: depois de ${ATR_DIAS} dias sem treinar perdes 0,5% do XP por cada dia a mais (máx. 25%) e podes descer de nível, rank e fase. Nível = 85% força relativa (1RM dos 4 levantamentos ÷ peso corporal, últimos 90 dias) + 15% dedicação (XP de volume).</p>`}
+ <p class="text-xs text-zinc-500">XP por treino = Σ(Peso × Repetições) ÷ 10. Nas barras, flexões e abdominais o Peso é o teu peso corporal + lastro; o cardio ganha XP pelas kcal estimadas. 🔥 Streak: ${STK_META} dias de treino seguidos, com no máximo ${STK_GAP-1} dias de pausa (+5% XP).</p>`}
 function sp(){let kg=pn($('#kg').value),cm=pn($('#cm').value);if(cm&&cm<3)cm*=100;if(kg<30||kg>300||cm<100||cm>250)return toast('Verifica o peso (kg) e a altura (cm).');wInit();const k0=+D.p.kg;D.p={kg,cm,age:pn($('#ag').value)};if(kg!==k0)wSet(td(),kg);save();pe=0;R();toast('Perfil guardado')}
 
 function last(n){const z=nz(n),c=cd(n);for(let j=D.ss.length-1;j>=0;j--){const s=D.ss[j],e=s.ex.find(x=>nz(x.n)==z);if(e){const[w,r]=c?e.s[0]:e.s.reduce((a,c)=>rm(...c)>rm(...a)?c:a),df=(Date.now()-Date.parse(s.d))/864e5;return`${df>=5&&df<=9?'Semana passada':'Última sessão ('+fd(s.d)+')'}: ${c?c[2](w,r):`${fm(w)}kg × ${r} reps`}`}}return''}
 function vT(){const dr=draft[day]=draft[day]||{},baseLen=(PL[day]||[]).length;
- let h=`<div class="grid grid-cols-4 gap-1">${DN.map(d=>`<button onclick="day='${d}';R()" class="rounded-lg text-xs whitespace-nowrap ${d==day?'b':'g'}" style="padding:9px 2px">${d}</button>`).join('')}</div>${dlCard()}
+ let h=`<div class="grid grid-cols-4 gap-1">${DN.map(d=>`<button onclick="day='${d}';R()" class="rounded-lg text-xs whitespace-nowrap ${d.includes('Corrida')?'col-span-4':''} ${d==day?'b':'g'}" style="padding:9px 4px">${d.includes('Corrida')?'🏃 '+d:d}</button>`).join('')}</div>${dlCard()}
  <label class="text-xs text-zinc-400 block">Data do treino<input type="date" class="i mt-1" id="dt" value="${dv||td()}" oninput="dv=this.value;pm0=pmul();upd()"></label>`;
  EX(day).forEach((n,i)=>{const k=mk(n),c=cd(n),bw=c===BW,cx=car(n),st=dr[n]=dr[n]||[['',''],['',''],['','']],l=last(n),isCustom=i>=baseLen;
   const h1=cx?c[0]:bw?'Lastro (kg)':'Peso (kg)',h2=cx?c[1]:'Repetições';
@@ -356,7 +364,7 @@ function vC(){const cs=[...new Set(B.map(b=>b.c))];
  return`<div class="rounded-lg border p-2 text-xs ${u?'border-[#39ff88] on':'border-white/10 opacity-50'}"><div class="text-xl">${hd?'❓':b.i}</div><b>${hd?'???':b.n}</b><div class="text-zinc-400">${hd?'Conquista secreta':b.d}</div>${u?`<div class="text-[#39ff88]">${fd(u)}</div>`:''}</div>`}).join('')}</div></div>`}).join('')}
 
 const vD0=()=>`<div class="c space-y-2"><b class="text-[#39ff88]">Backup e importação</b>
- <p class="text-xs text-zinc-400">Exporta para o texto abaixo e copia-o. Para importar, escolhe um ficheiro .json/.csv ou cola o texto aqui (CSV: data;dia;exercicio;peso;reps — vírgulas e pontos decimais valem o mesmo).</p>
+ <p class="text-xs text-zinc-400">Exporta para o texto abaixo e copia-o. Para importar, escolhe um ficheiro .json/.csv ou cola o texto aqui.</p>
  <textarea id="io" rows="8" class="i text-xs"></textarea>
  <div class="flex gap-2 flex-wrap"><button class="g" onclick="xj()">Exportar JSON</button><button class="g" onclick="xc()">Exportar CSV</button><button class="g" onclick="cp()">Copiar</button><button class="b" onclick="imp($('#io').value)">Importar texto</button></div>
  <input type="file" accept=".json,.csv,.txt" class="text-xs" onchange="fl(this)"></div>
@@ -378,7 +386,6 @@ function imp(t){t=t.trim();const n0=D.ss.length;
  srt();const nw=chk();save();toast(`Importação concluída: ${D.ss.length-n0} sessões novas.`);nb(nw);R();onOpen()}
 function rz(){if(!rs){rs=1;return toast('Clica outra vez para apagar tudo.')}D={p:{},ss:[],cx:{},u:{}};save();rs=0;R()}
 
-/* Provas & Metas: 100% a 300%, calculadas dos registos de treino */
 const TIERS=[100,150,200,250,300],MARKS=[50,100,150,200,250,300];
 const PV=[
 {id:'barras',n:'Flexões de braços na trave',u:'reps',m:10,t:0,s:'BARRAS (Dia1.2), melhor série'},
@@ -395,7 +402,7 @@ const nf=(x,v)=>x.id=='salto comprimento'?v.toFixed(2).replace('.',','):x.u=='m'
 const fv=(x,v)=>x.t?ft(v,hu(x)):nf(x,v)+' '+x.u;
 const tg=(x,p)=>x.t?x.m*100/p:x.m*p/100,pf=(x,v)=>!v?0:x.t?x.m/v*100:v/x.m*100;
 function vP(){const s=S();
- return`<div class="c"><b class="text-[#39ff88]">Provas &amp; Metas (300%)</b><p class="text-xs text-zinc-400 mt-1">Tudo é calculado sozinho, apenas a partir dos registos feitos em Dia1.2, Dia 2.1, Dia 3.1 e Dia 4.1. Contagem, distância e altura sobem com o valor; no tempo (80 m e marcha) quanto mais rápido, maior o rendimento. Cada meta atingida dá XP crescente acumulado: +100, +250, +500, +900 e +1500 XP.</p></div>`
+ return`<div class="c"><b class="text-[#39ff88]">Provas &amp; Metas (300%)</b><p class="text-xs text-zinc-400 mt-1">Tudo é calculado sozinho a partir dos registos em Dia1.2, Dia 2.1, Dia 3.1 e Dia 4.1. Cada meta atingida dá XP crescente acumulado: +100, +250, +500, +900 e +1500 XP.</p></div>`
  +PV.map(x=>{const v=s.pb[x.id],p=pf(x,v);
   return`<div class="c"><div class="flex justify-between items-start gap-2"><div><b>${x.n}</b><div class="text-xs text-zinc-400">100% = ${fv(x,x.m)} · ${x.t?'menos tempo é melhor':'mais é melhor'}</div></div><div class="text-2xl font-bold text-[#39ff88]" style="text-shadow:0 0 12px #39ff8899">${v?Math.round(p)+'%':'—'}</div></div>
   <div class="relative mx-4 mt-10 mb-9" style="height:14px"><div class="absolute inset-0 rounded-full bg-white/10 overflow-hidden"><div class="h-full rounded-full bg-[#39ff88]" style="width:${Math.min(100,p/3)}%;box-shadow:0 0 12px #39ff88"></div></div>
@@ -403,7 +410,6 @@ function vP(){const s=S();
   <div class="grid grid-cols-5 gap-1 text-center text-[10px]">${TIERS.map(q=>`<div class="rounded-lg border p-1 ${p>=q?'border-[#39ff88] on text-[#39ff88]':'border-white/10 text-zinc-400'}"><b>${q}%</b><div>${fv(x,tg(x,q))}</div></div>`).join('')}</div>
   <div class="text-xs text-zinc-400 mt-2">${v?`Melhor marca: ${fv(x,v)}${s.pb['~'+x.id]?` (${s.pb['~'+x.id]})`:''}`:'Sem registos ainda'} · fonte: ${x.s}</div></div>`}).join('')}
 
-/* Ao abrir o jogo (e ao voltar a ele): atrofia, alerta e regressão de nível/rank */
 function showAL(a,ex){const o=document.createElement('div');o.id='al';o.className='fixed inset-0 z-30 flex items-center justify-center p-4 bg-black/75';o.setAttribute('role','alertdialog');
  o.innerHTML=`<div class="c alr max-w-sm w-full text-center" style="background:rgba(30,6,12,.92)"><div class="text-4xl">⚠️</div><div class="text-[#ff8fa3] font-bold tracking-widest mt-1">ATROFIA MUSCULAR</div>
  <p class="mt-3">Ficaste <b>${a.dias}</b> dias sem treinar. O teu corpo começou a atrofiar e perdeste <b class="text-[#ff8fa3]">${fx(a.xp)} XP</b>!</p>
@@ -417,7 +423,6 @@ function onOpen(){const s=S(),pl=D.lv;let ex='';
  if(pl&&stg(s.lv)[0]!=stg(pl)[0])face='video';
  D.lv=s.lv;save();if(V=='h'&&pl&&pl!=s.lv)R()}
 
-/* ===== v3.4 · Histórico: acesso aos treinos registados ===== */
 let hf='',hdi=-1;
 const WD=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
 const fmt=(e,z)=>{const c=cd(e.n);return c?c[2](z[0],z[1]):`${fm(z[0])} kg × ${z[1]}`};
@@ -428,31 +433,27 @@ function hDel(i,b){if(hdi!=i){hdi=i;b.textContent='Toca outra vez para apagar';r
 function vX(){const s=S(),T=dnum(td()),tv=D.ss.reduce((a,x)=>a+x.ex.reduce((b,e)=>b+volE(e,swt(x)),0),0),L=D.ss.map((x,i)=>[x,i]).filter(([x])=>!hf||x.day==hf).reverse();
  return`<div class="c"><b class="text-[#39ff88]">Treinos registados</b><div class="text-xs text-zinc-400 mt-1">${D.ss.length} treinos · volume total ${fx(tv)} kg${s.lastD?` · último ${fd(s.lastD)} (${quando(T-dnum(s.lastD))})`:''}</div>
  <div class="flex gap-2 mt-3 flex-wrap"><button class="g text-sm" onclick="dlf('treinos-gym-rpg.csv',csvT(),'text/csv')">⬇ Descarregar CSV</button><button class="g text-sm" onclick="dlf('treinos-gym-rpg.json',jsonT(),'application/json')">⬇ Descarregar JSON</button></div></div>
- <div class="grid grid-cols-3 gap-1">${['',...DN].map(d=>`<button onclick="hf='${d}';R()" class="rounded-lg text-xs whitespace-nowrap ${d==hf?'b':'g'}" style="padding:9px 2px">${d||'Todos'}</button>`).join('')}</div>`
+ <div class="grid grid-cols-3 gap-1">${['',...DN].map(d=>`<button onclick="hf='${d}';R()" class="rounded-lg text-xs whitespace-nowrap ${d.includes('Corrida')?'col-span-2':''} ${d==hf?'b':'g'}" style="padding:9px 2px">${d||'Todos'}</button>`).join('')}</div>`
  +(L.length?L.map(([x,i])=>{const q=s.sx.get(x),v=x.ex.reduce((a,e)=>a+volE(e,swt(x)),0);
   return`<details class="c"><summary class="cursor-pointer"><b class="text-[#39ff88]">${esc(x.day)}</b> <span class="text-zinc-400 text-sm">· ${fd(x.d)} (${WD[new Date(x.d+'T12:00').getDay()]||''})</span><div class="text-xs text-zinc-400 mt-1">${x.ex.length} exercícios · ${fx(v)} kg${q?` · +${fx(q.x)} XP`:''}</div></summary>
   ${x.ex.map(e=>`<div class="mt-3 text-sm"><b>${esc(e.n)}</b><div class="text-xs text-zinc-300">${e.s.map(z=>esc(fmt(e,z))).join(' · ')}</div></div>`).join('')}
   <button class="g w-full text-sm mt-4 text-red-300" onclick="hDel(${i},this)">Apagar treino</button></details>`}).join(''):'<div class="c text-sm text-zinc-500">Sem treinos registados neste filtro.</div>')}
 
-/* ===== v3.5 · nível = 85% força relativa + 15% dedicação · atrofia % · XP de cardio · missões ===== */
 const LT={sup:2.25,agach:3,dead:3.5,hip:3.5};
-const MET={'saltar corda':[11,(w,r)=>w],'series 400m':[11,(w,r)=>w*r/60],'corrida continua':[11,(w,r)=>r],'sprints 100m':[11,(w,r)=>w*r/60],'cooper':[11,(w,r)=>r],'marcha':[7,(w,r)=>r],'box jump':[8,(w,r)=>r/6],'salto comprimento':[8,(w,r)=>r/6],'prancha':[4,(w,r)=>r/60]};
+const MET={'corrida':[11,(w,r)=>r],'saltar corda':[11,(w,r)=>w],'series 400m':[11,(w,r)=>w*r/60],'corrida continua':[11,(w,r)=>r],'sprints 100m':[11,(w,r)=>w*r/60],'cooper':[11,(w,r)=>r],'marcha':[7,(w,r)=>r],'box jump':[8,(w,r)=>r/6],'salto comprimento':[8,(w,r)=>r/6],'prancha':[4,(w,r)=>r/60]};
 const MUL=n=>{n=nz(n);return/panturrilha|trapezio/.test(n)?.5:/mesa|leg ext|pull|abdu|pulley/.test(n)?.6:/lateral|rosca|tricep|bicep/.test(n)?.8:1};
 function xpE(e,kg){const c=cd(e.n);kg=+kg||+D.p.kg||0;if(c&&c!==BW){const m=MET[nz(e.n)];return m?e.s.reduce((a,[w,r])=>a+m[0]*kg*Math.max(0,m[1](+w||0,+r||0))/60/2,0):0}return volE(e,kg)/XP_DIV*MUL(e.n)}
 const sd=()=>{try{localStorage.setItem('gymrpg-draft',JSON.stringify({draft,dv}))}catch(e){}};
 function bkChk(){if(!D.ss.length)return;if(!D.bk){D.bk=Date.now();save();return}if(Date.now()-D.bk>6048e5)setTimeout(()=>toast('💾 Mais de 7 dias sem backup: Histórico → Descarregar CSV/JSON.'),900)}
-function vMiss(s){const q=s.qw||{f:new Set,p:0,d:0},M=[['3 treinos de força (Dia1–4)',q.f.size>=3,q.f.size+'/3',150],['1 recorde pessoal',!!q.p,(q.p?1:0)+'/1',150],['Dia 3.1 feito',!!q.d,(q.d?1:0)+'/1',100]];
+function vMiss(s){const q=s.qw||{f:new Set,p:0,d:0},M=[['3 treinos de força (Dia1–4)',q.f.size>=3,q.f.size+'/3',150],['1 recorde pessoal',!!q.p,(q.p?1:0)+'/1',150],['Corrida / Dia 3.1 feito',!!q.d,(q.d?1:0)+'/1',100]];
  return`<div class="c text-sm"><div class="text-xs text-zinc-400">💪 Força relativa <b class="text-[#39ff88]">${Math.round(s.fs*100)}%</b> · Dedicação <b class="text-[#39ff88]">${fx(s.xpd)} XP</b> · nível = 85% força + 15% dedicação</div><b class="text-[#39ff88] block mt-3">🎯 Missões da semana</b>${M.map(([n,ok,p,x])=>`<div class="flex justify-between mt-1 ${ok?'text-[#7dffb3]':'text-zinc-300'}"><span>${ok?'✅':'⬜'} ${n}</span><span class="text-xs">${p} · +${x} XP</span></div>`).join('')}</div>`}
 function vEv(){const T=dnum(td()),m0=wkn(T)*7-3,days=new Set(D.ss.map(x=>dnum(x.d))),vb=[];let cal='<div class="flex gap-1">';
  for(let w=11;w>=0;w--){const b=m0-w*7;let col='<div class="flex flex-col gap-1">';for(let i=0;i<7;i++){const n=b+i;col+=`<div style="width:18px;height:18px;border-radius:4px;background:${n>T?'transparent':days.has(n)?'#39ff88':'rgba(255,255,255,.08)'}"></div>`}
   vb.push(D.ss.filter(x=>{const n=dnum(x.d);return n>=b&&n<b+7}).reduce((a,x)=>a+x.ex.reduce((c,e)=>c+volE(e,swt(x)),0),0));cal+=col+'</div>'}
- cal+='</div>';const mx=Math.max(1,...vb),pts=D.ss.filter(x=>+x.kg).map(x=>[dnum(x.d),+x.kg]);
- let pw='<p class="text-xs text-zinc-500">Precisas de treinos com peso corporal guardado (os novos treinos guardam-no sozinhos).</p>';
- if(pts.length>=2){const a=Math.min(...pts.map(p=>p[1]))-1,b=Math.max(...pts.map(p=>p[1]))+1,x0=pts[0][0],x1=Math.max(pts[pts.length-1][0],x0+1);pw=`<svg viewBox="0 0 300 100" class="w-full"><polyline fill="none" stroke="#39ff88" stroke-width="2" points="${pts.map(p=>`${((p[0]-x0)/(x1-x0)*290+5).toFixed(1)},${(95-(p[1]-a)/(b-a)*90).toFixed(1)}`).join(' ')}"/></svg><div class="text-xs text-zinc-400">${fm(pts[0][1])} → ${fm(pts[pts.length-1][1])} kg</div>`}
+ cal+='</div>';const mx=Math.max(1,...vb);
  return`<div class="c"><div class="text-sm text-zinc-400 mb-2">Calendário · últimas 12 semanas (colunas = semanas, linhas = Seg→Dom)</div><div class="overflow-x-auto">${cal}</div></div><div class="c"><div class="text-sm text-zinc-400 mb-2">Volume por semana (kg)</div><div class="flex items-end gap-1" style="height:90px">${vb.map(v=>`<div class="flex-1 rounded-t" style="height:${Math.max(2,v/mx*100)}%;background:#39ff88"></div>`).join('')}</div><div class="text-xs text-zinc-500 mt-1">Máx.: ${fx(mx)} kg</div></div>${vPeso()}`}
 const vG=()=>vG0()+vEv();
 
-/* ===== v3.9 · Login com Google: os dados ficam guardados na tua conta Google (Drive, pasta privada da app) ===== */
 var CL={ready:false,dirty:false,t:null,h:'',st:'off',msg:'',tok:'',exp:0,email:'',tc:null,fid:'',mt:'',pl:null};
 const lsg=k=>{try{return localStorage.getItem(k)}catch(e){return null}},lss=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}};
 const GC=(()=>{try{return JSON.parse(lsg('gymrpg-g-cfg'))||{}}catch(e){return{}}})(),CLIENT_ID=String(GC.id||(window.GYM_CLOUD||{}).clientId||'').trim(),okId=/^[\w.-]+\.apps\.googleusercontent\.com$/.test(CLIENT_ID)&&!/SEU-CLIENT/.test(CLIENT_ID),GSC='https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/userinfo.email',GA='https://www.googleapis.com/';
@@ -481,12 +482,12 @@ async function cloudPoll(){if(!CL.ready||!CL.tok||document.hidden)return;try{con
 async function startSync(){setSt('sync');CL.ready=false;try{await cloudPull();CL.ready=true;if(CL.dirty)await doPush();else setSt('ok');clearInterval(CL.pl);CL.pl=setInterval(cloudPoll,20000)}catch(e){if(CL.st!='expired')setSt('err',e.message)}R()}
 async function onTok(r){if(!r||r.error)return setSt('err',(r&&(r.error_description||r.error))||'Login cancelado');CL.tok=r.access_token;CL.exp=Date.now()+(+r.expires_in||3600)*1000-60000;try{const u=await(await fetch(GA+'oauth2/v3/userinfo',{headers:{Authorization:'Bearer '+CL.tok}})).json();CL.email=u.email||CL.email}catch(e){}lss('gymrpg-gacc',CL.email||'1');lss('gymrpg-gtok',JSON.stringify({tok:CL.tok,exp:CL.exp,email:CL.email}));startSync()}
 function gLogin(){if(!okId){V='d';R();return toast('Primeiro mete o Client ID do Google (separador Dados).')}if(!/^https?:$/.test(location.protocol))return toast('Abre o jogo num endereço https (ex.: GitHub Pages) para entrar com Google.');if(!CL.tc)return toast('A biblioteca do Google ainda não carregou. Tenta daqui a pouco.');CL.tc.requestAccessToken({prompt:lsg('gymrpg-gacc')?'':'select_account'})}
-async function gOut(){try{await doPush()}catch(e){}try{if(CL.tok&&window.google)google.accounts.oauth2.revoke(CL.tok,()=>{})}catch(e){}clearInterval(CL.pl);CL.tok='';CL.ready=false;CL.email='';CL.fid='';try{localStorage.removeItem('gymrpg-gtok');localStorage.removeItem('gymrpg-gacc')}catch(e){}setSt('local');toast('Sessão terminada. Os dados continuam neste dispositivo.')}
+async function gOut(){try{await doPush()}catch(e){}try{if(CL.tok&&window.google)google.accounts.oauth2.revoke(CL.tok,()=>{})}catch(e){}clearInterval(CL.pl);CL.tok='';CL.ready=false;CL.email='';CL.fid='';try{localStorage.removeItem('gymrpg-gtok');localStorage.removeItem('gymrpg-gacc')}catch(e){}setSt('local');toast('Sessão terminada.')}
 async function syncNow(){if(!CL.tok)return gLogin();await startSync()}
 function cloudInit(){if(!okId){setSt('off');return}
  const go=n=>{if(window.google&&google.accounts&&google.accounts.oauth2){CL.tc=google.accounts.oauth2.initTokenClient({client_id:CLIENT_ID,scope:GSC,callback:onTok,error_callback:e=>setSt('err',(e&&(e.message||e.type))||'Login cancelado')});
    try{const z=JSON.parse(lsg('gymrpg-gtok')||'null');if(z&&z.exp>Date.now()){CL.tok=z.tok;CL.exp=z.exp;CL.email=z.email||'';startSync();return}}catch(e){}
-   setSt(lsg('gymrpg-gacc')?'expired':'local')}else if(n<20)setTimeout(()=>go(n+1),500);else setSt('err','Não foi possível carregar a biblioteca do Google (sem internet?).')};
+   setSt(lsg('gymrpg-gacc')?'expired':'local')}else if(n<20)setTimeout(()=>go(n+1),500);else setSt('err','Não foi possível carregar a biblioteca do Google.')};
  go(0);document.addEventListener('visibilitychange',()=>{if(!document.hidden)cloudPoll()})}
 const IN='class="w-full rounded-lg bg-black/30 border border-white/15 px-3 py-2 text-sm mt-2"';
 function cfgSave(){const u=(($('#cu')||{}).value||'').trim();if(!/^[\w.-]+\.apps\.googleusercontent\.com$/.test(u))return toast('O Client ID acaba em .apps.googleusercontent.com');lss('gymrpg-g-cfg',JSON.stringify({id:u}));toast('Guardado. A recarregar…');setTimeout(()=>location.reload(),600)}
@@ -506,17 +507,15 @@ function cloudChip(){
 }
 const vH=()=>cloudChip()+vH0();
 function vCloud(){const https=/^https:$/.test(location.protocol),lib=!!(window.google&&window.google.accounts),ck=(ok,t)=>`<div class="text-xs ${ok?'text-[#7dffb3]':'text-zinc-400'}">${ok?'✅':'⬜'} ${t}</div>`,
- M={off:'Falta o Client ID do Google: segue os passos abaixo (é só uma vez).',local:'Entra com a tua conta Google. Os treinos ficam guardados na tua conta (pasta privada da app no Drive) e aparecem no PC e no telemóvel.',expired:'A sessão Google expirou. Toca em Reconectar (1 toque).',sync:'⏳ A sincronizar…',ok:'✅ Guardado na tua conta Google'+(CL.email?' ('+esc(CL.email)+')':'')+'. As alterações feitas noutros dispositivos aparecem sozinhas.',err:'⚠️ '+esc(CL.msg||'Erro')+'. Os dados estão guardados aqui e são reenviados quando for possível.'};
+ M={off:'Falta o Client ID do Google.',local:'Entra com a tua conta Google. Os treinos ficam guardados na tua conta (pasta privada da app no Drive).',expired:'A sessão Google expirou. Toca em Reconectar.',sync:'⏳ A sincronizar…',ok:'✅ Guardado na tua conta Google'+(CL.email?' ('+esc(CL.email)+')':'')+'.',err:'⚠️ '+esc(CL.msg||'Erro')+'.'};
  return`<div class="c"><b class="text-[#39ff88]">☁️ Conta Google</b><div class="text-xs text-zinc-300 mt-1">${M[CL.st]||''}</div>
  <div class="mt-3 flex flex-wrap gap-2">${okId?(CL.tok?`<button class="g text-sm" onclick="syncNow()">🔄 Sincronizar agora</button><button class="g text-sm" onclick="gOut()">Sair${CL.email?' · '+esc(CL.email):''}</button>`:`<button class="b text-sm" onclick="gLogin()">${CL.st=='expired'?'Reconectar Google':'Entrar com Google'}</button>`):''}${hasBk()?'<button class="g text-sm" onclick="restoreBk()">↩ Restaurar dados antigos</button>':''}</div>
  <details class="mt-3" ${CL.tok?'':'open'}><summary class="text-sm cursor-pointer text-[#39ff88]">Configuração e diagnóstico</summary><div class="mt-2 space-y-1">${ck(https,'Jogo aberto num endereço https')}${ck(lib,'Biblioteca do Google carregada')}${ck(okId,'Client ID do Google')}${ck(!!CL.tok,'Sessão iniciada')}</div>
- <input id="cu" ${IN} placeholder="123456-abc.apps.googleusercontent.com" value="${esc(okId?CLIENT_ID:'')}"><div class="flex gap-2 mt-2"><button class="b text-sm" onclick="cfgSave()">Guardar Client ID</button><button class="g text-sm" onclick="cfgClear()">Limpar</button></div>
- <ol class="text-xs text-zinc-400 mt-3 list-decimal pl-4 space-y-1"><li>console.cloud.google.com → cria um projeto.</li><li>APIs e serviços → Biblioteca → ativa a <b>Google Drive API</b>.</li><li>Ecrã de consentimento OAuth → Externo → preenche o nome e o teu email; em "Utilizadores de teste" adiciona o teu Gmail.</li><li>Credenciais → Criar credenciais → ID de cliente OAuth → Aplicação Web.</li><li>Em "Origens JavaScript autorizadas" mete: <b class="text-[#e8fff1] break-all select-all">${esc(location.origin)}</b></li><li>Copia o Client ID para o campo acima.</li></ol></details></div>`}
+ <input id="cu" ${IN} placeholder="123456-abc.apps.googleusercontent.com" value="${esc(okId?CLIENT_ID:'')}"><div class="flex gap-2 mt-2"><button class="b text-sm" onclick="cfgSave()">Guardar Client ID</button><button class="g text-sm" onclick="cfgClear()">Limpar</button></div></details></div>`}
 const hasBk=()=>!!lsg('gymrpg-backup-sync');
 function restoreBk(){try{const b=JSON.parse(lsg('gymrpg-backup-sync'));if(!b)return;replaceD(b);D.ts=Date.now();save();toast('Dados anteriores restaurados');R()}catch(e){toast('Não foi possível restaurar.')}}
 const vD=()=>vDuoCfg()+vCloud()+vInst()+vD0();
 
-/* ===== v3.10 · Histórico de peso ===== */
 function wInit(){if(!Array.isArray(D.wh))D.wh=[];if(!D.wh.length&&+D.p.kg>0){const d=D.ss.length?D.ss.map(x=>x.d).filter(Boolean).sort()[0]:td();D.wh.push({d,kg:+D.p.kg})}}
 function wAt(d){const h=(D.wh||[]).filter(x=>+x.kg>0).sort((a,b)=>a.d<b.d?-1:1);let v=null;h.forEach(x=>{if(x.d<=d)v=+x.kg});return v!=null?v:(h[0]?+h[0].kg:(+D.p.kg||0))}
 function swt(s){return +s.kg>0?+s.kg:wAt(s.d)}
@@ -533,18 +532,16 @@ function vPeso(){wInit();const h=D.wh.filter(x=>+x.kg>0).slice().sort((a,b)=>a.d
  const rows=h.slice().reverse().map((x,i,a)=>{const q=a[i+1],df=q?Math.round((+x.kg-+q.kg)*10)/10:0;return`<div class="flex justify-between items-center text-sm py-1 border-t border-white/10"><span>${fd(x.d)}</span><span><b>${fm(+x.kg)} kg</b> <span class="text-xs ${df>0?'text-red-300':df<0?'text-[#7dffb3]':'text-zinc-500'}">${q?(df>0?'+':df<0?'−':'')+fm(Math.abs(df))+' kg':'início'}</span><button class="text-zinc-500 px-2" onclick="wDel('${x.d}')">✕</button></span></div>`}).join('');
  return`<div class="c"><div class="text-sm text-zinc-400">⚖️ Peso corporal</div><div class="text-center mt-1"><span id="wv" class="text-4xl font-semibold text-[#e8fff1]">${f2(h[n-1].kg)}</span> <span class="text-sm text-zinc-400">kg</span></div><div id="wd" class="text-center text-xs text-zinc-400 mb-1">${fd(h[n-1].d)}</div>
  <svg id="wsvg" viewBox="0 0 ${W} ${H}" class="w-full select-none" style="touch-action:pan-y" onpointerdown="wpick(event)" onpointermove="if(event.buttons||event.pointerType=='touch')wpick(event)"><defs><linearGradient id="wg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#39ff88" stop-opacity=".35"/><stop offset="1" stop-color="#39ff88" stop-opacity="0"/></linearGradient></defs>${tk}<path d="${ar}" fill="url(#wg)"/><path d="${ln}" fill="none" stroke="#39ff88" stroke-width="2" stroke-linejoin="round"/>${P.map(p=>`<circle cx="${p[0]}" cy="${p[1]}" r="2.5" fill="#39ff88"/>`).join('')}<line id="wl" x1="${l[0]}" x2="${l[0]}" y1="${pt}" y2="${H-pb}" stroke="#b6ffd4" stroke-dasharray="3 3"/><circle id="wc" cx="${l[0]}" cy="${l[1]}" r="5" fill="#061a10" stroke="#39ff88" stroke-width="2"/><text x="${pl}" y="${H-4}" font-size="9" fill="#8aa396">${fd(h[0].d)}</text><text x="${W-pr}" y="${H-4}" text-anchor="end" font-size="9" fill="#8aa396">${fd(h[n-1].d)}</text></svg>
- <div class="text-xs text-zinc-500">Toca no gráfico para ver cada registo. Os treinos antigos guardam o peso que tinhas na altura.</div>
  <div class="flex gap-2 items-start mt-3"><input id="wk" ${IN} inputmode="decimal" placeholder="Peso (kg)" style="margin-top:0"><input id="wdt" ${IN} type="date" value="${td()}" style="margin-top:0"><button class="b text-sm" style="white-space:nowrap" onclick="wAdd()">Registar</button></div>
  <div class="mt-3">${rows}</div></div>`}
 
-/* ===== v3.11 · Semana de descarga · Resumo semanal/mensal · Instalar como app ===== */
 const DLN=7;
 function dlWin(){return(D.dlw||[]).map(x=>[dnum(x.s),dnum(x.e)]).filter(x=>isFinite(x[0])&&isFinite(x[1]))}
 function dlOv(a,b){let c=0;dlWin().forEach(([s,e])=>{const lo=Math.max(a+1,s),hi=Math.min(b,e);if(hi>=lo)c+=hi-lo+1});return c}
 function eg(a,b){return Math.max(0,b-a-dlOv(a,b))}
 function dlAct(){const T=dnum(td());return dlWin().find(([s,e])=>T>=s&&T<=e)||null}
 function dlStart(){D.dlw=(D.dlw||[]).concat([{s:td(),e:dstr(dnum(td())+DLN-1)}]);save();R();toast('🛌 Semana de descarga iniciada')}
-function dlEnd(){const a=dlAct();if(!a)return;D.dlw=D.dlw.map(x=>dnum(x.s)==a[0]?{...x,e:td()}:x);save();R();toast('Descarga terminada')}
+function dlEnd(){const a=dlAct();if(!a)return;D.dlw=D.dlw.map(x=>dnum(x.s)==a[0]?{...x,e:dstr(dnum(td())-1)}:x);save();R();toast('Descarga terminada')}
 function dlSnz(){D.dls=dstr(dnum(td())+3);save();R()}
 function dlSug(){if(dlAct()||!D.ss.length||(D.dls&&td()<=D.dls))return null;const T=dnum(td()),ds=D.ss.map(x=>dnum(x.d)).filter(isFinite).sort((a,b)=>a-b);if(!ds.length||T-ds[ds.length-1]>14)return null;
  const en=(D.dlw||[]).map(x=>dnum(x.e)).filter(isFinite),ref=en.length?Math.max(...en):ds[0],ws=Math.floor((T-ref)/7);if(ws<3)return null;
@@ -552,8 +549,8 @@ function dlSug(){if(dlAct()||!D.ss.length||(D.dls&&td()<=D.dls))return null;cons
  const s=S();let st=0,tot=0;for(const k of['sup','agach','dead','hip']){let a=0,b=0;Object.entries(s.h[k]||{}).forEach(([d,v])=>{const g=T-dnum(d);if(g<=21)a=Math.max(a,v);else if(g<=49)b=Math.max(b,v)});if(a&&b){tot++;if(a<=b*1.005)st++}}
  return ws>=4&&tot>=2&&st>=2?`Estagnação em ${st} dos ${tot} levantamentos principais nas últimas semanas`:null}
 function dlBanner(){const T=dnum(td()),a=dlAct(),B='style="border-color:rgba(255,200,87,.45)"';
- if(a){const l=a[1]-T+1;return`<div class="c" ${B}><b class="text-[#ffd166]">🛌 Semana de descarga ativa</b><div class="text-xs text-zinc-300 mt-1">Até ${fd(dstr(a[1]))} (${l} ${l==1?'dia':'dias'}). Cerca de metade das séries e −12% de carga. A atrofia e o streak não contam nesta semana. Vê as cargas sugeridas no separador Treino.</div><button class="g text-sm mt-3" onclick="dlEnd()">Terminar descarga</button></div>`}
- const g=dlSug();return g?`<div class="c" ${B}><b class="text-[#ffd166]">🛌 Semana de descarga sugerida</b><div class="text-xs text-zinc-300 mt-1">${esc(g)}. Durante 7 dias: cerca de metade das séries e −10 a 15% de carga. A atrofia não conta nessa semana.</div><div class="flex gap-2 mt-3"><button class="b text-sm" onclick="dlStart()">Iniciar descarga</button><button class="g text-sm" onclick="dlSnz()">Agora não</button></div></div>`:''}
+ if(a){const l=a[1]-T+1;return`<div class="c" ${B}><b class="text-[#ffd166]">🛌 Semana de descarga ativa</b><div class="text-xs text-zinc-300 mt-1">Até ${fd(dstr(a[1]))} (${l} ${l==1?'dia':'dias'}). Cerca de metade das séries e −12% de carga. A atrofia e o streak não contam nesta semana.</div><button class="g text-sm mt-3" onclick="dlEnd()">Terminar descarga</button></div>`}
+ const g=dlSug();return g?`<div class="c" ${B}><b class="text-[#ffd166]">🛌 Semana de descarga sugerida</b><div class="text-xs text-zinc-300 mt-1">${esc(g)}. Durante 7 dias: cerca de metade das séries e −10 a 15% de carga.</div><div class="flex gap-2 mt-3"><button class="b text-sm" onclick="dlStart()">Iniciar descarga</button><button class="g text-sm" onclick="dlSnz()">Agora não</button></div></div>`:''}
 const rnd=w=>Math.round(w*2)/2;
 function dlSugEx(e){const n=nz(e.n),c=cd(e.n),Z=e.s||[],N=Z.length;if(!N)return'';const h=Math.max(1,Math.ceil(N/2)),sr=h==1?'série':'séries',mx=i=>Math.max(...Z.map(z=>+z[i]||0)),G='<span class="text-zinc-500">';
  if(!c){const rs=Z.map(z=>+z[1]||0).sort((a,b)=>a-b);return`<b>${fm(rnd(mx(0)*.875))} kg</b> × ${rs[Math.floor(N/2)]} reps · ${h} ${sr} ${G}(antes: ${fm(mx(0))} kg, ${N} séries)</span>`}
@@ -561,8 +558,8 @@ function dlSugEx(e){const n=nz(e.n),c=cd(e.n),Z=e.s||[],N=Z.length;if(!N)return'
  const w=+Z[0][0]||0,r=+Z[0][1]||0,ct=['series 400m','sprints 100m','box jump','salto comprimento'].includes(n);
  return`<b>${ct?c[2](w,Math.max(1,Math.ceil(r/2))):c[2](w*.875,Math.round(r*.875))}</b> ${G}(antes: ${c[2](w,r)}) · ritmo leve</span>`}
 function dlCard(){if(!dlAct())return'';const W=dlWin(),inW=x=>{const n=dnum(x.d);return W.some(([a,b])=>n>=a&&n<=b)},L=D.ss.filter(x=>x.day==day&&!inW(x)).sort((a,b)=>a.d<b.d?-1:1).pop();
- return`<div class="c" style="border-color:rgba(255,200,87,.45)"><b class="text-[#ffd166]">🛌 Descarga · ${esc(day)}</b>${L?`<div class="text-xs text-zinc-400 mt-1">Com base no último treino (${fd(L.d)}): cerca de metade das séries e −12% de carga.</div>${L.ex.map(e=>`<div class="mt-2 text-sm"><b>${esc(e.n)}</b><div class="text-xs text-[#e8fff1]">${dlSugEx(e)}</div></div>`).join('')}`:'<div class="text-xs text-zinc-400 mt-1">Ainda não tens um treino registado neste dia para calcular.</div>'}</div>`}
-var RV={m:'w',o:0};const MES=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+ return`<div class="c" style="border-color:rgba(255,200,87,.45)"><b class="text-[#ffd166]">🛌 Descarga · ${esc(day)}</b>${L?`<div class="text-xs text-zinc-400 mt-1">Com base no último treino (${fd(L.d)}):</div>${L.ex.map(e=>`<div class="mt-2 text-sm"><b>${esc(e.n)}</b><div class="text-xs text-[#e8fff1]">${dlSugEx(e)}</div></div>`).join('')}`:'<div class="text-xs text-zinc-400 mt-1">Ainda não tens um treino registado neste dia.</div>'}</div>`}
+var RV={m:'w',o:0};
 function rvRange(){const T=dnum(td());if(RV.m=='w'){const a=wkn(T)*7-3+RV.o*7;return[a,a+6]}const t=new Date();t.setDate(1);t.setMonth(t.getMonth()+RV.o);const y=t.getFullYear(),m=t.getMonth(),n=new Date(y,m+1,1),p=v=>String(v).padStart(2,'0');return[dnum(`${y}-${p(m+1)}-01`),dnum(`${n.getFullYear()}-${p(n.getMonth()+1)}-01`)-1]}
 function vR(){const s=S(),[a,b]=rvRange(),len=b-a+1,inR=(x,lo,hi)=>{const n=dnum(x.d);return n>=lo&&n<=hi},ss=D.ss.filter(x=>inR(x,a,b)),ps=D.ss.filter(x=>inR(x,a-len,a-1)),vol=L=>L.reduce((t,x)=>t+x.ex.reduce((u,e)=>u+volE(e,swt(x)),0),0),v=vol(ss),pv=vol(ps),days=new Set(ss.map(x=>x.d)).size,xp=ss.reduce((t,x)=>t+((s.sx.get(x)||{}).x||0),0),
  best=(L,k)=>{let m=0;L.forEach(x=>x.ex.forEach(e=>{if(mk(e.n)==k)e.s.forEach(([w,r])=>{if(r<=10)m=Math.max(m,rm(w,r))})}));return m},before=D.ss.filter(x=>dnum(x.d)<a),LN={sup:'Supino',agach:'Agachamento',dead:'Deadlift',hip:'Hip Thrust'},
@@ -580,7 +577,7 @@ const isSA=()=>{try{return matchMedia('(display-mode: standalone)').matches||nav
 function doInstall(){if(INST){INST.prompt();INST=null}}
 function vInst(){if(isSA())return'';return`<div class="c"><b class="text-[#39ff88]">📲 Instalar no telemóvel</b><div class="text-xs text-zinc-300 mt-1">Ícone no ecrã, abre sem barra do navegador e funciona offline.</div>${INST?'<button class="b text-sm mt-3" onclick="doInstall()">Instalar app</button>':'<div class="text-xs text-zinc-400 mt-2">Android (Chrome): menu ⋮ → Instalar app. iPhone (Safari): Partilhar → Adicionar ao ecrã principal.</div>'}</div>`}
 
-/* ===== 1. Motor de Fundo da Aplicação (Constelação Cyber como na imagem) ===== */
+/* ===== 1. Motor de Fundo da Aplicação ===== */
 const BG={cv:null,ctx:null,w:0,h:0,pts:[],pulses:[],ptr:{x:-999,y:-999},gridY:0,mode:'normal'};
 function initAppBg(){
  BG.cv=$('#appBg');if(!BG.cv)return;
@@ -656,60 +653,28 @@ function renderAppBg(){
  requestAnimationFrame(renderAppBg);
 }
 
-/* ===== 2. Motor de Aura Interativa Exclusivo do Quadrado do Herói ("Aura do Titã") ===== */
+/* ===== 2. Motor de Aura Interativa Exclusivo do Quadrado do Herói ===== */
 const HA={cv:null,ctx:null,w:360,h:540,pts:[],pulses:[],ptr:{x:-999,y:-999,down:false},gridOff:0,mode:'normal',tick:0,running:false};
-
 function mkHeroPt(w,h,mode,x,y,burst){
  const isStr=mode==='streak',isAtr=mode==='atrophy',isDl=mode==='deload';
  const cols=isAtr?['#ff4d6d','#ff8fa3','#c9184a']:isDl?['#ffd166','#ffb703','#39ff88']:isStr?['#39ff88','#ffcc33','#ff9a3c','#7dffb3']:['#39ff88','#10b981','#7dffb3'];
  const isEdge=!burst&&Math.random()<.72;
  const px=x??(isEdge?(Math.random()<.5?Math.random()*75:w-Math.random()*75):Math.random()*w);
- return{
-  x:px,
-  y:y??Math.random()*h,
-  r:burst?(Math.random()*2.6+1):(Math.random()*(isStr?3.1:2.3)+1),
-  vx:burst?(Math.random()-.5)*4.5:(Math.random()-.5)*(isAtr?1.2:.4),
-  vy:burst?(Math.random()-.5)*4.5:isAtr?(Math.random()*1.4+.45):-(Math.random()*(isStr?2.3:isDl?.38:.9)+.3),
-  a:Math.random()*.7+.2,
-  c:cols[Math.floor(Math.random()*cols.length)],
-  phase:Math.random()*Math.PI*2,
-  life:burst?36:null
- };
+ return{x:px,y:y??Math.random()*h,r:burst?(Math.random()*2.6+1):(Math.random()*(isStr?3.1:2.3)+1),vx:burst?(Math.random()-.5)*4.5:(Math.random()-.5)*(isAtr?1.2:.4),vy:burst?(Math.random()-.5)*4.5:isAtr?(Math.random()*1.4+.45):-(Math.random()*(isStr?2.3:isDl?.38:.9)+.3),a:Math.random()*.7+.2,c:cols[Math.floor(Math.random()*cols.length)],phase:Math.random()*Math.PI*2,life:burst?36:null};
 }
-
-function syncHeroMode(){
- try{
-  const s=S();
-  const next=s.gl>ATR_DIAS?'atrophy':dlAct()?'deload':s.mult?'streak':'normal';
-  if(HA.mode!==next){HA.mode=next;HA.pts=[]}
- }catch(e){}
-}
-
-function heroPulse(x,y){
- HA.pulses.push({x:x??HA.w/2,y:y??HA.h/2,r:6,a:.75});
-}
-
+function syncHeroMode(){try{const s=S();const next=s.gl>ATR_DIAS?'atrophy':dlAct()?'deload':s.mult?'streak':'normal';if(HA.mode!==next){HA.mode=next;HA.pts=[]}}catch(e){}}
+function heroPulse(x,y){HA.pulses.push({x:x??HA.w/2,y:y??HA.h/2,r:6,a:.75})}
 function bindHeroCanvas(){
  const cv=$('#heroAuraCv');if(!cv||HA.cv===cv)return;
  HA.cv=cv;HA.ctx=cv.getContext('2d');
  cv.width=HA.w;cv.height=HA.h;HA.pts=[];
  const getPos=e=>{const r=cv.getBoundingClientRect();return{x:(e.clientX-r.left)/r.width*HA.w,y:(e.clientY-r.top)/r.height*HA.h}};
  cv.addEventListener('pointermove',e=>{const p=getPos(e);HA.ptr.x=p.x;HA.ptr.y=p.y});
- cv.addEventListener('pointerdown',e=>{
-  const p=getPos(e);HA.ptr.x=p.x;HA.ptr.y=p.y;HA.ptr.down=true;
-  heroPulse(p.x,p.y);
-  for(let i=0;i<10;i++)HA.pts.push(mkHeroPt(HA.w,HA.h,HA.mode,p.x,p.y,true));
- });
+ cv.addEventListener('pointerdown',e=>{const p=getPos(e);HA.ptr.x=p.x;HA.ptr.y=p.y;HA.ptr.down=true;heroPulse(p.x,p.y);for(let i=0;i<10;i++)HA.pts.push(mkHeroPt(HA.w,HA.h,HA.mode,p.x,p.y,true))});
  cv.addEventListener('pointerup',()=>{HA.ptr.down=false});
  cv.addEventListener('pointerleave',()=>{HA.ptr.x=-999;HA.ptr.y=-999;HA.ptr.down=false});
 }
-
-function initHeroAura(){
- if(HA.running)return;
- HA.running=true;
- requestAnimationFrame(renderHeroAura);
-}
-
+function initHeroAura(){if(HA.running)return;HA.running=true;requestAnimationFrame(renderHeroAura)}
 function renderHeroAura(){
  HA.tick++;
  if(V==='h'){
@@ -717,55 +682,31 @@ function renderHeroAura(){
   const{ctx,w,h,pts,pulses,ptr,mode}=HA;
   if(ctx){
    ctx.clearRect(0,0,w,h);
-   const pal=mode==='atrophy'?{main:'#ff4d6d',sec:'255,77,109'}
-            :mode==='deload' ?{main:'#ffd166',sec:'255,209,102'}
-            :mode==='streak' ?{main:'#39ff88',sec:'57,255,136',spark:'#ffcc33'}
-            :                 {main:'#39ff88',sec:'57,255,136'};
-
+   const pal=mode==='atrophy'?{main:'#ff4d6d',sec:'255,77,109'}:mode==='deload'?{main:'#ffd166',sec:'255,209,102'}:mode==='streak'?{main:'#39ff88',sec:'57,255,136',spark:'#ffcc33'}:{main:'#39ff88',sec:'57,255,136'};
    const target=mode==='streak'?52:mode==='deload'?20:mode==='atrophy'?38:32;
    while(pts.length<target)pts.push(mkHeroPt(w,h,mode));
 
-   // 1. Grelha tática subtil em perspetiva no fundo do quadrado do Herói
    const spd=mode==='streak'?.75:mode==='deload'?.15:mode==='atrophy'?.3:.35;
    HA.gridOff=(HA.gridOff+spd)%36;
    const hz=h*0.68;
-   ctx.strokeStyle=`rgba(${pal.sec},${mode==='streak'?0.18:0.12})`;
-   ctx.lineWidth=1;
-   ctx.beginPath();
+   ctx.strokeStyle=`rgba(${pal.sec},${mode==='streak'?0.18:0.12})`;ctx.lineWidth=1;ctx.beginPath();
    for(let i=-6;i<=6;i++){ctx.moveTo(w/2+i*18,hz);ctx.lineTo(w/2+i*85,h)}
-   for(let j=0;j<7;j++){
-    const t=((j*36+HA.gridOff)/252)**1.6;
-    const y=hz+t*(h-hz);
-    if(y<=h){ctx.moveTo(0,y);ctx.lineTo(w,y)}
-   }
+   for(let j=0;j<7;j++){const t=((j*36+HA.gridOff)/252)**1.6,y=hz+t*(h-hz);if(y<=h){ctx.moveTo(0,y);ctx.lineTo(w,y)}}
    ctx.stroke();
 
-   // 2. Pedestal e anéis de energia aos pés do Herói
    const baseG=ctx.createRadialGradient(w/2,h*.92,6,w/2,h*.9,w*.55);
-   baseG.addColorStop(0,`rgba(${pal.sec},0.5)`);
-   if(mode==='streak')baseG.addColorStop(0.45,'rgba(255,204,51,0.25)');
-   baseG.addColorStop(1,'transparent');
+   baseG.addColorStop(0,`rgba(${pal.sec},0.5)`);if(mode==='streak')baseG.addColorStop(0.45,'rgba(255,204,51,0.25)');baseG.addColorStop(1,'transparent');
    ctx.fillStyle=baseG;ctx.fillRect(0,0,w,h);
 
-   ctx.save();
-   ctx.translate(w/2,h*.9);ctx.scale(1,0.25);
-   for(let r=0;r<2;r++){
-    ctx.beginPath();
-    ctx.arc(0,0,70+r*36+Math.sin(HA.tick*.05+r)*5,0,Math.PI*2);
-    ctx.strokeStyle=r===1&&mode==='streak'?'rgba(255,204,51,0.5)':`rgba(${pal.sec},0.42)`;
-    ctx.lineWidth=2.2;ctx.stroke();
-   }
+   ctx.save();ctx.translate(w/2,h*.9);ctx.scale(1,0.25);
+   for(let r=0;r<2;r++){ctx.beginPath();ctx.arc(0,0,70+r*36+Math.sin(HA.tick*.05+r)*5,0,Math.PI*2);ctx.strokeStyle=r===1&&mode==='streak'?'rgba(255,204,51,0.5)':`rgba(${pal.sec},0.42)`;ctx.lineWidth=2.2;ctx.stroke()}
    ctx.restore();
 
-   // 3. Luz reativa ao toque/rato dentro do quadrado do Herói
    if(ptr.x>0){
     const spot=ctx.createRadialGradient(ptr.x,ptr.y,2,ptr.x,ptr.y,110);
-    spot.addColorStop(0,`rgba(${pal.sec},0.28)`);
-    spot.addColorStop(1,'transparent');
+    spot.addColorStop(0,`rgba(${pal.sec},0.28)`);spot.addColorStop(1,'transparent');
     ctx.fillStyle=spot;ctx.fillRect(0,0,w,h);
    }
-
-   // 4. Ondas de energia (Pulses) ao tocar no quadrado
    for(let i=pulses.length-1;i>=0;i--){
     const p=pulses[i];p.r+=3.8;p.a*=.92;
     if(p.a<.02){pulses.splice(i,1);continue}
@@ -773,359 +714,339 @@ function renderHeroAura(){
     ctx.strokeStyle=mode==='streak'&&i%2===0?`rgba(255,204,51,${p.a})`:`rgba(${pal.sec},${p.a})`;
     ctx.lineWidth=2;ctx.stroke();
    }
-
-   // 5. Partículas de Mana / Faíscas / Atrofia
    for(let i=pts.length-1;i>=0;i--){
-    const p=pts[i];
-    const glitch=mode==='atrophy'?(Math.random()-.5)*2.4:Math.sin(HA.tick*.04+p.phase)*.35;
-    p.x+=p.vx+glitch;
-    p.y+=p.vy;
-
+    const p=pts[i],glitch=mode==='atrophy'?(Math.random()-.5)*2.4:Math.sin(HA.tick*.04+p.phase)*.35;
+    p.x+=p.vx+glitch;p.y+=p.vy;
     const dx=p.x-ptr.x,dy=p.y-ptr.y,d=Math.hypot(dx,dy);
-    if(d<85&&d>1){
-     const dir=ptr.down?-1.3:1.9;
-     p.x+=(dx/d)*dir;p.y+=(dy/d)*dir;
-    }
-
-    if(p.life!=null){
-     p.life--;p.a*=.93;
-     if(p.life<=0){pts.splice(i,1);continue}
-    }else{
-     if(p.y<-15){p.y=h+10;p.x=Math.random()*w}
-     if(p.y>h+15){p.y=-10;p.x=Math.random()*w}
-     if(p.x<-10)p.x=w+10;if(p.x>w+10)p.x=-10;
-    }
-
+    if(d<85&&d>1){const dir=ptr.down?-1.3:1.9;p.x+=(dx/d)*dir;p.y+=(dy/d)*dir}
+    if(p.life!=null){p.life--;p.a*=.93;if(p.life<=0){pts.splice(i,1);continue}}
+    else{if(p.y<-15){p.y=h+10;p.x=Math.random()*w}if(p.y>h+15){p.y=-10;p.x=Math.random()*w}if(p.x<-10)p.x=w+10;if(p.x>w+10)p.x=-10}
     ctx.beginPath();
-    if(mode==='streak'&&!p.life){
-     ctx.ellipse(p.x,p.y,p.r*.85,p.r*2.2,0,0,Math.PI*2);
-    }else{
-     ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
-    }
-    ctx.fillStyle=p.c;ctx.globalAlpha=p.a;
-    ctx.shadowBlur=10;ctx.shadowColor=p.c;
-    ctx.fill();
+    if(mode==='streak'&&!p.life)ctx.ellipse(p.x,p.y,p.r*.85,p.r*2.2,0,0,Math.PI*2);else ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+    ctx.fillStyle=p.c;ctx.globalAlpha=p.a;ctx.shadowBlur=10;ctx.shadowColor=p.c;ctx.fill();
    }
    ctx.globalAlpha=1;ctx.shadowBlur=0;
   }
  }
  requestAnimationFrame(renderHeroAura);
 }
-/* ===== MODO ARENA DE CASAL (CABO DE GUERRA, BOSS CO-OP, APOSTAS & PROVOCAÇÕES) ===== */
-const ME_DEFAULT = 'João'; // <-- No teu ficheiro muda para 'João', no dela deixa 'Midina'
-const DUO_KEY = 'gymrpg-duo-cfg';
+
+/* ===== 3. MODO ARENA DE CASAL (CABO DE GUERRA, BOSS CO-OP, APOSTAS, CORRIDA & PROVOCAÇÕES) ===== */
+const ME_DEFAULT='João';
+const DUO_KEY='gymrpg-duo-cfg';
 const BOSSES = [
-  ['🐉 Hidra da Inércia', 3000],
-  ['🗿 Golem de Ferro Negro', 3500],
-  ['👹 Titã do Abismo', 4000],
-  ['🦂 Leviatã de Aço', 3200],
-  ['🔥 Fenrir das Cinzas', 3800],
-  ['⚔️ Colosso da Preguiça', 3500]
+  ['🐉 Hidra da Inércia', 10000],
+  ['🗿 Golem de Ferro Negro', 10500],
+  ['👹 Titã do Abismo', 11000],
+  ['🦂 Leviatã de Aço', 10200],
+  ['🔥 Fenrir das Cinzas', 10800],
+  ['⚔️ Colosso da Preguiça', 10500]
 ];
-let DUO = { url: '', room: 'joao-midina', me: ME_DEFAULT, lastTs: 0, peer: null, feed: [], stake: '', claims: {}, hist: {} };
-try { DUO = Object.assign(DUO, JSON.parse(localStorage.getItem(DUO_KEY) || '{}')); } catch(e) {}
+let DUO={url:'',room:'joao-midina',me:ME_DEFAULT,lastTs:0,peer:null,feed:[],stake:'',claims:{},hist:{}, bossTier: 1};
+try{DUO=Object.assign(DUO,JSON.parse(localStorage.getItem(DUO_KEY)||'{}'))}catch(e){}
 
-function saveDuoCfg() {
-  const u = ($('#duoUrl')?.value || '').trim().replace(/\/+$/, '');
-  const r = ($('#duoRoom')?.value || 'joao-midina').trim().replace(/[^a-zA-Z0-9_-]/g, '');
-  const m = ($('#duoMe')?.value || ME_DEFAULT).trim();
-  if (u && !/^https:\/\/.*\.firebaseio\.com$|^https:\/\/.*\.firebasedatabase\.app$/.test(u)) {
-    return toast('⚠️ O URL do Firebase deve terminar em .firebaseio.com ou .firebasedatabase.app');
+function saveDuoCfg(){
+ const u=($('#duoUrl')?.value||'').trim().replace(/\/+$/,'');
+ const r=($('#duoRoom')?.value||'joao-midina').trim().replace(/[^a-zA-Z0-9_-]/g,'');
+ const m=($('#duoMe')?.value||ME_DEFAULT).trim();
+ if(u&&!/^https:\/\/.*\.firebaseio\.com$|^https:\/\/.*\.firebasedatabase\.app$/.test(u)){
+  return toast('⚠️ O URL do Firebase deve terminar em .firebaseio.com ou .firebasedatabase.app');
+ }
+ DUO.url=u;DUO.room=r||'joao-midina';DUO.me=m||ME_DEFAULT;
+ localStorage.setItem(DUO_KEY,JSON.stringify(DUO));
+ toast('⚔️ Arena de Casal guardada!');
+ duoPushWorkout(null,null,S()).then(()=>duoPoll(true));
+ R();
+}
+
+function getMyWeekStats(s){
+ const T=dnum(td()),wk=wkn(T),w0=wk*7-3;
+ const wkSS=D.ss.filter(x=>{const n=dnum(x.d);return n>=w0&&n<=w0+6});
+ const wkVol=Math.round(wkSS.reduce((a,x)=>a+x.ex.reduce((b,e)=>b+volE(e,swt(x)),0),0));
+ const wkXP=Math.round(wkSS.reduce((a,x)=>a+((s.sx.get(x)||{}).x||0),0));
+ let wkKm=0;
+ wkSS.forEach(x=>(x.ex||[]).forEach(e=>{
+  const n=nz(e.n);
+  if(n==='corrida'||n==='corrida continua'||n==='cooper'){
+   (e.s||[]).forEach(([w])=>{wkKm+=(n==='cooper'?(+w||0)/1000:(+w||0))});
   }
-  DUO.url = u; DUO.room = r || 'joao-midina'; DUO.me = m || ME_DEFAULT;
-  localStorage.setItem(DUO_KEY, JSON.stringify(DUO));
-  toast('⚔️ Arena de Casal guardada!');
-  duoPushWorkout(null, null, S()).then(() => duoPoll(true));
-  R();
+ }));
+ wkKm=Math.round(wkKm*10)/10;
+ const kg=+D.p.kg||65;
+ const rel=Math.round(((wkVol+wkKm*150)/kg)*10)/10;
+ return{wk,wkTrades:wkSS.length,wkVol,wkXP,wkKm,kg,rel};
 }
 
-/* Calcula os dados da tua semana atual */
-function getMyWeekStats(s) {
-  const T = dnum(td()), wk = wkn(T), w0 = wk * 7 - 3;
-  const wkSS = D.ss.filter(x => { const n = dnum(x.d); return n >= w0 && n <= w0 + 6; });
-  const wkVol = Math.round(wkSS.reduce((a, x) => a + x.ex.reduce((b, e) => b + volE(e, swt(x)), 0), 0));
-  const wkXP = Math.round(wkSS.reduce((a, x) => a + ((s.sx.get(x) || {}).x || 0), 0));
-  const kg = +D.p.kg || 65;
-  const rel = Math.round((wkVol / kg) * 10) / 10; // Esforço Relativo = Volume ÷ Peso Corporal
-  return { wk, wkTrades: wkSS.length, wkVol, wkXP, kg, rel };
-}
-
-/* Envia o estado atual e notificações (treino, provocação ou recompensa) para a nuvem */
-async function duoPushWorkout(ns, g, s1, customEv) {
-  if (!DUO.url) return;
-  const st = getMyWeekStats(s1);
-  const payload = {
-    name: DUO.me, lv: s1.lv, rank: s1.t, xp: Math.round(s1.xp), stk: s1.stk,
-    kg: st.kg, wk: st.wk, wkTrades: st.wkTrades, wkVol: st.wkVol, wkXP: st.wkXP, rel: st.rel,
-    ts: Date.now()
+async function duoPushWorkout(ns,g,s1,customEv){
+ if(!DUO.url)return;
+ const st=getMyWeekStats(s1);
+ const payload={
+  name:DUO.me,lv:s1.lv,rank:s1.t,xp:Math.round(s1.xp),stk:s1.stk,
+  kg:st.kg,wk:st.wk,wkTrades:st.wkTrades,wkVol:st.wkVol,wkKm:st.wkKm,wkXP:st.wkXP,rel:st.rel,
+  ts:Date.now()
+ };
+ let ev=customEv||null;
+ if(!ev&&ns&&g){
+  let rKm=0,rMin=0;
+  (ns.ex||[]).forEach(e=>{
+   const n=nz(e.n);
+   if(n==='corrida'||n==='corrida continua'||n==='cooper'){
+    (e.s||[]).forEach(([w,r])=>{rKm+=(n==='cooper'?(+w||0)/1000:(+w||0));rMin+=(+r||0)});
+   }
+  });
+  ev={
+   type:'workout',who:DUO.me,day:ns.day,d:ns.d,
+   vol:Math.round(g.v),xp:Math.round(g.x),km:Math.round(rKm*10)/10,min:Math.round(rMin),
+   pr:!!g.pr,lv:s1.lv,ts:Date.now()
   };
-
-  let ev = customEv || null;
-  if (!ev && ns && g) {
-    ev = {
-      type: 'workout', who: DUO.me, day: ns.day, d: ns.d,
-      vol: Math.round(g.v), xp: Math.round(g.x), pr: !!g.pr, lv: s1.lv, ts: Date.now()
-    };
+ }
+ try{
+  const base=`${DUO.url}/rooms/${DUO.room}`;
+  await fetch(`${base}/players/${encodeURIComponent(DUO.me)}.json`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+  await fetch(`${base}/history/${st.wk}/${encodeURIComponent(DUO.me)}.json`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({rel:st.rel,xp:st.wkXP,vol:st.wkVol,km:st.wkKm})});
+  if(ev){
+   await fetch(`${base}/events/${ev.ts}.json`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(ev)});
   }
-
-  try {
-    const base = `${DUO.url}/rooms/${DUO.room}`;
-    await fetch(`${base}/players/${encodeURIComponent(DUO.me)}.json`, {
-      method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload)
-    });
-    await fetch(`${base}/history/${st.wk}/${encodeURIComponent(DUO.me)}.json`, {
-      method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ rel: st.rel, xp: st.wkXP, vol: st.wkVol })
-    });
-    if (ev) {
-      await fetch(`${base}/events/${ev.ts}.json`, {
-        method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(ev)
-      });
-    }
-  } catch (e) {}
+ }catch(e){}
 }
 
-/* Botões Rápidos de Provocação e Incentivo (1 Toque) */
-async function duoSendTaunt(kind) {
-  if (!DUO.url) return toast('Configura primeiro a Arena em Dados!');
-  const msgs = {
-    fire:  `🔥 ${DUO.me}: "Bora treinar! O Boss da semana não se derrota sozinho!"`,
-    crown: `👑 ${DUO.me} mandou-te uma salva de palmas pelo teu grande treino!`,
-    eyes:  `👀 ${DUO.me}: "Cuidado que estou a passar-te à frente no Cabo de Guerra..."`
-  };
-  const ev = { type: 'taunt', kind, who: DUO.me, text: msgs[kind], d: td(), ts: Date.now() };
-  await duoPushWorkout(null, null, S(), ev);
-  toast('⚡ Mensagem enviada para o telemóvel do parceiro!');
+async function duoSendTaunt(kind){
+ if(!DUO.url)return toast('Configura primeiro a Arena em Dados!');
+ const msgs={
+  fire:`🔥 ${DUO.me}: "Bora treinar! O Boss da semana não se derrota sozinho!"`,
+  crown:`👑 ${DUO.me} mandou-te uma salva de palmas pelo teu grande treino!`,
+  eyes:`👀 ${DUO.me}: "Cuidado que estou a passar-te à frente no Cabo de Guerra..."`
+ };
+ const ev={type:'taunt',kind,who:DUO.me,text:msgs[kind],d:td(),ts:Date.now()};
+ await duoPushWorkout(null,null,S(),ev);
+ toast('⚡ Mensagem enviada para o telemóvel do parceiro!');
+ duoPoll(true);
+}
+
+async function duoSaveStake(){
+ if(!DUO.url)return;
+ const val=($('#duoStakeInp')?.value||'').trim();
+ DUO.stake=val;
+ try{
+  await fetch(`${DUO.url}/rooms/${DUO.room}/meta/stake.json`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(val)});
+  toast('🏆 Aposta do casal atualizada!');
   duoPoll(true);
+ }catch(e){}
 }
 
-/* Guardar a Aposta / Prémio da Semana */
-async function duoSaveStake() {
-  if (!DUO.url) return;
-  const val = ($('#duoStakeInp')?.value || '').trim();
-  DUO.stake = val;
-  try {
-    await fetch(`${DUO.url}/rooms/${DUO.room}/meta/stake.json`, {
-      method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(val)
-    });
-    toast('🏆 Aposta do casal atualizada!');
-    duoPoll(true);
-  } catch(e) {}
-}
-
-/* Reclamar o Baú do Boss Semanal (+200 XP extra) */
 async function duoClaimBoss(wk) {
   const claimKey = wk + '|' + DUO.me;
   if (DUO.claims && DUO.claims[claimKey]) return toast('Já recolheste o baú desta semana!');
-  D.px = (+D.px || 0) + 200; // Soma +200 XP permanentes ao jogador
+  D.px = (+D.px || 0) + 200;
   DUO.claims = DUO.claims || {};
   DUO.claims[claimKey] = true;
   localStorage.setItem(DUO_KEY, JSON.stringify(DUO));
   save();
+
+  const bIdx = Math.abs(wk) % BOSSES.length;
   try {
-    await fetch(`${DUO.url}/rooms/${DUO.room}/claims/${wk}_${encodeURIComponent(DUO.me)}.json`, {
+    const base = `${DUO.url}/rooms/${DUO.room}`;
+    await fetch(`${base}/claims/${wk}_${encodeURIComponent(DUO.me)}.json`, {
       method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(true)
     });
+    // Verifica se o escalão já subiu nesta semana; se não, fortalece o próximo Boss!
+    const upRes = await fetch(`${base}/meta/lastBossUpWk.json`);
+    const lastUpWk = await upRes.json();
+    if (lastUpWk !== wk) {
+      const nextTier = (DUO.bossTier || 1) + 1;
+      await fetch(`${base}/meta/bossTier.json`, {
+        method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(nextTier)
+      });
+      await fetch(`${base}/meta/lastBossUpWk.json`, {
+        method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(wk)
+      });
+      DUO.bossTier = nextTier;
+    }
   } catch(e) {}
+
   if (typeof bgPulse === 'function') bgPulse();
   if (typeof heroPulse === 'function') heroPulse();
   const s1 = S();
   await duoPushWorkout(null, null, s1, {
-    type: 'boss', who: DUO.me, text: `🎁 ${DUO.me} abriu o Baú do Boss Semanal (+200 XP)!`, d: td(), ts: Date.now()
+    type: 'boss', who: DUO.me, text: `🎁 ${DUO.me} abriu o Baú do Boss (+200 XP)! O próximo Boss subiu para Nv ${DUO.bossTier}!`, d: td(), ts: Date.now()
   });
-  toast('🎁 Baú do Boss aberto! Ganhaste +200 XP de bónus!');
+  toast(`🎁 Baú aberto (+200 XP)! O próximo Boss será Nv ${DUO.bossTier}!`);
   R();
 }
 
-/* Procura novidades, treinos e provocações do parceiro a cada 15 segundos */
-async function duoPoll(force) {
-  if (!DUO.url || (document.hidden && !force)) return;
-  try {
-    const res = await fetch(`${DUO.url}/rooms/${DUO.room}.json`);
-    if (!res.ok) return;
-    const data = await res.json() || {};
-
-    const players = data.players || {};
-    const peerKey = Object.keys(players).find(k => k !== DUO.me);
-    const prevPeerTs = DUO.peer ? DUO.peer.ts : 0;
-    if (peerKey) DUO.peer = players[peerKey];
-
-    DUO.stake = (data.meta && data.meta.stake) || '';
-    DUO.hist = data.history || {};
-    const remoteClaims = data.claims || {};
-    Object.keys(remoteClaims).forEach(k => { DUO.claims[k.replace('_', '|')] = true; });
-
-    const evObj = data.events || {};
-    const evList = Object.values(evObj).sort((a, b) => b.ts - a.ts).slice(0, 15);
-    DUO.feed = evList;
-
-    const latestPartnerEv = evList.find(e => e.who !== DUO.me);
-    if (latestPartnerEv && latestPartnerEv.ts > (DUO.lastTs || 0)) {
-      const isFirstLoad = !DUO.lastTs;
-      DUO.lastTs = latestPartnerEv.ts;
-      localStorage.setItem(DUO_KEY, JSON.stringify(DUO));
-      if (!isFirstLoad) {
-        let msg = '';
-        if (latestPartnerEv.type === 'taunt' || latestPartnerEv.type === 'boss') {
-          msg = latestPartnerEv.text;
-          if (typeof bgPulse === 'function') bgPulse();
-        } else {
-          msg = `⚔️ ${latestPartnerEv.who} acabou de treinar ${latestPartnerEv.day} (${fx(latestPartnerEv.vol)} kg · +${fx(latestPartnerEv.xp)} XP)${latestPartnerEv.pr ? ' 🏅 RECORDE!' : ''}!`;
-        }
-        toast(msg);
-        if ('Notification' in window && Notification.permission === 'granted') {
-          new Notification('GYM RPG · Arena de Casal', { body: msg, icon: 'icon-192.png' });
-        }
-      }
-      if (V === 'n' || V === 'h') R();
-    } else if (DUO.peer && DUO.peer.ts !== prevPeerTs && V === 'n') {
-      R();
+async function duoPoll(force){
+ if(!DUO.url||(document.hidden&&!force))return;
+ try{
+  const res=await fetch(`${DUO.url}/rooms/${DUO.room}.json`);
+  if(!res.ok)return;
+  const data=await res.json()||{};
+  const players=data.players||{};
+  const peerKey=Object.keys(players).find(k=>k!==DUO.me);
+  const prevPeerTs=DUO.peer?DUO.peer.ts:0;
+  if(peerKey)DUO.peer=players[peerKey];
+  DUO.stake=(data.meta&&data.meta.stake)||'';
+  DUO.hist=data.history||{};
+  DUO.bossTier = Math.max(1, +(data.meta && data.meta.bossTier) || 1);
+  const remoteClaims=data.claims||{};
+  Object.keys(remoteClaims).forEach(k=>{DUO.claims[k.replace('_','|')]=true});
+  const evObj=data.events||{};
+  const evList=Object.values(evObj).sort((a,b)=>b.ts-a.ts).slice(0,15);
+  DUO.feed=evList;
+  const latestPartnerEv=evList.find(e=>e.who!==DUO.me);
+  if(latestPartnerEv&&latestPartnerEv.ts>(DUO.lastTs||0)){
+   const isFirstLoad=!DUO.lastTs;
+   DUO.lastTs=latestPartnerEv.ts;
+   localStorage.setItem(DUO_KEY,JSON.stringify(DUO));
+   if(!isFirstLoad){
+    let msg='';
+    if(latestPartnerEv.type==='taunt'||latestPartnerEv.type==='boss'){
+     msg=latestPartnerEv.text;
+     if(typeof bgPulse==='function')bgPulse();
+    }else{
+     const det=latestPartnerEv.km>0?`🏃 ${fm(latestPartnerEv.km)} km em ${latestPartnerEv.min} min`:`${fx(latestPartnerEv.vol)} kg`;
+     msg=`⚔️ ${latestPartnerEv.who} acabou de registar ${latestPartnerEv.day} (${det} · +${fx(latestPartnerEv.xp)} XP)${latestPartnerEv.pr?' 🏅 RECORDE!':''}!`;
     }
-  } catch (e) {}
-}
-setInterval(() => duoPoll(false), 15000);
-
-/* Cartão Completo da Arena de Casal (aparece em 🔔 Notificações) */
-function vDuo(s) {
-  if (!DUO.url) {
-    return `<div class="c flex items-center justify-between gap-2" style="border-color:rgba(255,204,51,.4)">
-      <div class="text-xs text-zinc-300">⚔️ <b>Arena de Casal (João &amp; Midina):</b> Liga os dois jogos no separador <b>Dados</b> para desbloquearem o Cabo de Guerra, o Boss Semanal e notificações em tempo real!</div>
-      <button class="b text-xs shrink-0" onclick="V='d';R()">Ligar</button>
-    </div>`;
+    toast(msg);
+    if('Notification'in window&&Notification.permission==='granted'){
+     new Notification('GYM RPG · Arena de Casal',{body:msg,icon:'icon-192.png'});
+    }
+   }
+   if(V==='n'||V==='h')R();
+  }else if(DUO.peer&&DUO.peer.ts!==prevPeerTs&&V==='n'){
+   R();
   }
+ }catch(e){}
+}
+setInterval(()=>duoPoll(false),15000);
 
-  const my = getMyWeekStats(s);
-  const p = DUO.peer;
-  const peerActiveWk = p && p.wk === my.wk;
-  const pRel = peerActiveWk ? (+p.rel || 0) : 0;
-  const pXP  = peerActiveWk ? (+p.wkXP || 0) : 0;
-  const pVol = peerActiveWk ? (+p.wkVol || 0) : 0;
-  const pTr  = peerActiveWk ? (+p.wkTrades || 0) : 0;
-
-  // 1. Cálculo do Cabo de Guerra (Esforço Relativo = Volume ÷ Peso Corporal)
-  const totRel = my.rel + pRel;
-  const myPct = totRel > 0 ? Math.min(92, Math.max(8, Math.round((my.rel / totRel) * 100))) : 50;
-  const leader = my.rel > pRel ? DUO.me : pRel > my.rel ? (p ? p.name : 'Parceiro') : 'Empate';
-
-  // 2. Cálculo do Placar Anual de Semanas Ganhas
-  let myWins = 0, peerWins = 0;
-  Object.entries(DUO.hist || {}).forEach(([wkKey, obj]) => {
-    if (+wkKey >= my.wk || !obj || !p) return; // Conta semanas já fechadas
-    const rm = obj[DUO.me] ? (+obj[DUO.me].rel || 0) : 0;
-    const rp = obj[p.name] ? (+obj[p.name].rel || 0) : 0;
-    if (rm > rp) myWins++; else if (rp > rm) peerWins++;
-  });
-
-  // 3. Cálculo do Boss Semanal Cooperativo
-  const [bossName, bossMaxHP] = BOSSES[Math.abs(my.wk) % BOSSES.length];
-  const dmgTotal = my.wkXP + pXP;
-  const bossHP = Math.max(0, bossMaxHP - dmgTotal);
-  const bossPct = Math.max(0, Math.min(100, (bossHP / bossMaxHP) * 100));
-  const bossDead = bossHP === 0;
-  const claimed = !!(DUO.claims && DUO.claims[my.wk + '|' + DUO.me]);
-
-  return `<div class="c space-y-3" style="border-color:rgba(255,204,51,.55);box-shadow:0 0 26px rgba(255,204,51,.12)">
-    <!-- Cabeçalho e Placar Anual -->
-    <div class="flex justify-between items-center gap-2">
-      <div>
-        <b class="text-[#ffd166] text-base">⚔️ Arena de Casal · Versus &amp; Co-Op</b>
-        <div class="text-[11px] text-zinc-400">🏆 Taça Anual de Semanas: <b class="text-white">${esc(DUO.me)} ${myWins}</b> – <b class="text-white">${peerWins} ${esc(p ? p.name : 'Parceiro')}</b></div>
-      </div>
-      <button class="g text-xs py-1 px-2.5" onclick="duoPushWorkout(null,null,S()).then(()=>duoPoll(true))">🔄 Sincronizar</button>
-    </div>
-
-    <!-- Aposta / Prémio da Semana -->
-    <div class="rounded-xl bg-black/35 border border-white/10 p-2.5">
-      <div class="text-[10px] uppercase tracking-wider text-[#ffd166]">🎁 Aposta / Prémio da Semana</div>
-      <div class="flex gap-1.5 mt-1">
-        <input id="duoStakeInp" class="i text-xs" placeholder="Ex: Quem perder faz massagem / Se matarmos o Boss vamos jantar..." value="${esc(DUO.stake)}">
-        <button class="g text-xs px-3 shrink-0" onclick="duoSaveStake()">Guardar</button>
-      </div>
-    </div>
-
-    <!-- Cartões Lado a Lado -->
-    <div class="grid grid-cols-2 gap-2 text-center">
-      <div class="rounded-xl bg-black/30 border border-[#39ff88]/40 p-2.5">
-        <div class="text-xs text-zinc-300 font-bold">👤 ${esc(DUO.me)} (Tu)</div>
-        <div class="text-lg font-bold mt-0.5">Nv ${s.lv} <span class="text-xs font-normal text-zinc-400">· 🔥 ${s.stk}d</span></div>
-        <div class="text-xs text-[#ffd166] font-bold mt-1">⚖️ ${fm(my.rel)}× peso corporal</div>
-        <div class="text-[11px] text-zinc-400">${my.wkTrades} treinos · ${fx(my.wkVol)} kg · +${fx(my.wkXP)} XP</div>
-      </div>
-      ${p ? `<div class="rounded-xl bg-black/30 border border-[#38bdf8]/40 p-2.5">
-        <div class="text-xs text-[#38bdf8] font-bold">⚔️ ${esc(p.name)}</div>
-        <div class="text-lg font-bold mt-0.5">Nv ${p.lv} <span class="text-xs font-normal text-zinc-400">· 🔥 ${p.stk}d</span></div>
-        <div class="text-xs text-[#ffd166] font-bold mt-1">⚖️ ${fm(pRel)}× peso corporal</div>
-        <div class="text-[11px] text-zinc-400">${pTr} treinos · ${fx(pVol)} kg · +${fx(pXP)} XP</div>
-      </div>` : `<div class="rounded-xl bg-black/30 border border-white/10 p-2.5 flex items-center justify-center text-xs text-zinc-500">A aguardar sincronização do parceiro na sala "${esc(DUO.room)}"…</div>`}
-    </div>
-
-    <!-- 1. Barra de Cabo de Guerra (Esforço Relativo Justo) -->
-    <div class="space-y-1">
-      <div class="flex justify-between text-[11px]">
-        <span class="text-zinc-400">⚖️ <b>Cabo de Guerra</b> (Volume ÷ Peso)</span>
-        <span class="text-[#ffd166] font-semibold">${leader === 'Empate' ? '⚡ Empate técnico!' : '👑 ' + esc(leader) + ' lidera a semana!'}</span>
-      </div>
-      <div class="h-3.5 w-full rounded-full overflow-hidden flex bg-black/50 p-0.5 border border-white/15">
-        <div style="width:${myPct}%;background:linear-gradient(90deg,#16a34a,#39ff88);transition:width .5s" class="h-full rounded-l-full"></div>
-        <div style="width:${100 - myPct}%;background:linear-gradient(90deg,#38bdf8,#0284c7);transition:width .5s" class="h-full rounded-r-full"></div>
-      </div>
-      <div class="flex justify-between text-[10px] text-zinc-400">
-        <span>${esc(DUO.me)}: ${myPct}% (${fm(my.rel)}×)</span>
-        <span>${esc(p ? p.name : 'Parceiro')}: ${100 - myPct}% (${fm(pRel)}×)</span>
-      </div>
-    </div>
-
-    <!-- 2. Boss Semanal Cooperativo (Raid de Casal) -->
-    <div class="rounded-xl bg-black/40 border ${bossDead ? 'border-[#39ff88]' : 'border-[#ff4d6d]/45'} p-2.5 space-y-1.5">
-      <div class="flex justify-between items-center">
-        <b class="text-xs ${bossDead ? 'text-[#39ff88]' : 'text-[#ff8fa3]'}">${bossName} ${bossDead ? '· DERROTADO! 🎉' : '· Raid Cooperativa'}</b>
-        <span class="text-xs font-bold">${fx(bossHP)} / ${fx(bossMaxHP)} HP</span>
-      </div>
-      <div class="h-3 w-full bg-white/10 rounded-full overflow-hidden">
-        <div class="h-full transition-all duration-500" style="width:${bossPct}%;background:linear-gradient(90deg,#c9184a,#ff4d6d);box-shadow:0 0 10px #ff4d6d"></div>
-      </div>
-      <div class="flex justify-between items-center text-[11px] text-zinc-400">
-        <span>Dano causado juntos: <b class="text-white">${fx(dmgTotal)}</b> (${esc(DUO.me)} ${fx(my.wkXP)} + ${esc(p ? p.name : 'Parceiro')} ${fx(pXP)})</span>
-        ${bossDead ? (claimed ? `<span class="text-[#39ff88] font-bold">✅ +200 XP recebidos</span>` : `<button class="b text-xs py-1 px-2.5 animate-bounce" onclick="duoClaimBoss(${my.wk})">🎁 Abrir Baú (+200 XP)</button>`) : ''}
-      </div>
-    </div>
-
-    <!-- 3. Botões Rápidos de Provocação & Incentivo -->
-    <div class="space-y-1">
-      <div class="text-[10px] uppercase tracking-wider text-zinc-400">⚡ Enviar Alerta Instantâneo ao Parceiro</div>
-      <div class="grid grid-cols-3 gap-1.5">
-        <button class="g text-xs py-1.5 px-2 truncate" onclick="duoSendTaunt('fire')">🔥 Bora treinar!</button>
-        <button class="g text-xs py-1.5 px-2 truncate" onclick="duoSendTaunt('crown')">👑 Grande treino!</button>
-        <button class="g text-xs py-1.5 px-2 truncate" onclick="duoSendTaunt('eyes')">👀 Passei-te!</button>
-      </div>
-    </div>
-
-    <!-- 4. Mural de Notificações em Tempo Real -->
-    ${DUO.feed.length ? `<div class="space-y-1 pt-2 border-t border-white/10">
-      <div class="text-[10px] uppercase tracking-wider text-zinc-400">🔔 Mural de Atividade em Tempo Real</div>
-      ${DUO.feed.slice(0, 6).map(e => `<div class="text-xs flex justify-between items-center gap-2 py-1 border-b border-white/5">
-        <span class="truncate">${e.type === 'taunt' || e.type === 'boss' ? esc(e.text) : `<b class="${e.who === DUO.me ? 'text-zinc-300' : 'text-[#ffd166]'}">${e.who === DUO.me ? '🏋️ Tu' : '⚔️ ' + esc(e.who)}</b> concluiu <b>${esc(e.day)}</b> (${fx(e.vol)} kg)${e.pr ? ' 🏅' : ''}`}</span>
-        <span class="text-[11px] text-zinc-400 shrink-0">${e.xp ? '+' + fx(e.xp) + ' XP · ' : ''}${fd(e.d || td())}</span>
-      </div>`).join('')}
-    </div>` : ''}
+function vDuo(s){
+ if(!DUO.url){
+  return`<div class="c flex items-center justify-between gap-2" style="border-color:rgba(255,204,51,.4)">
+   <div class="text-xs text-zinc-300">⚔️ <b>Arena de Casal (João &amp; Midina):</b> Liga os dois jogos no separador <b>Dados</b> para desbloquearem o Cabo de Guerra, o Boss Semanal e notificações em tempo real!</div>
+   <button class="b text-xs shrink-0" onclick="V='d';R()">Ligar</button>
   </div>`;
+ }
+ const my=getMyWeekStats(s);
+ const p=DUO.peer;
+ const peerActiveWk=p&&p.wk===my.wk;
+ const pRel=peerActiveWk?(+p.rel||0):0;
+ const pXP=peerActiveWk?(+p.wkXP||0):0;
+ const pVol=peerActiveWk?(+p.wkVol||0):0;
+ const pKm=peerActiveWk?(+p.wkKm||0):0;
+ const pTr=peerActiveWk?(+p.wkTrades||0):0;
+
+ const totRel=my.rel+pRel;
+ const myPct=totRel>0?Math.min(92,Math.max(8,Math.round((my.rel/totRel)*100))):50;
+ const leader=my.rel>pRel?DUO.me:pRel>my.rel?(p?p.name:'Parceiro'):'Empate';
+
+ let myWins=0,peerWins=0;
+ Object.entries(DUO.hist||{}).forEach(([wkKey,obj])=>{
+  if(+wkKey>=my.wk||!obj||!p)return;
+  const rm=obj[DUO.me]?(+obj[DUO.me].rel||0):0;
+  const rp=obj[p.name]?(+obj[p.name].rel||0):0;
+  if(rm>rp)myWins++;else if(rp>rm)peerWins++;
+ });
+
+ const [rawBossName, baseHP] = BOSSES[Math.abs(my.wk) % BOSSES.length];
+  const tier = Math.max(1, +DUO.bossTier || 1);
+  const bossName = `${rawBossName} · Nv ${tier}`;
+  const bossMaxHP = Math.round(baseHP * Math.pow(1.25, tier - 1));
+ const dmgTotal=my.wkXP+pXP;
+ const bossHP=Math.max(0,bossMaxHP-dmgTotal);
+ const bossPct=Math.max(0,Math.min(100,(bossHP/bossMaxHP)*100));
+ const bossDead=bossHP===0;
+ const claimed=!!(DUO.claims&&DUO.claims[my.wk+'|'+DUO.me]);
+
+ return`<div class="c space-y-3" style="border-color:rgba(255,204,51,.55);box-shadow:0 0 26px rgba(255,204,51,.12)">
+  <div class="flex justify-between items-center gap-2">
+   <div>
+    <b class="text-[#ffd166] text-base">⚔️ Arena de Casal · Versus &amp; Co-Op</b>
+    <div class="text-[11px] text-zinc-400">🏆 Taça Anual de Semanas: <b class="text-white">${esc(DUO.me)} ${myWins}</b> – <b class="text-white">${peerWins} ${esc(p?p.name:'Parceiro')}</b></div>
+   </div>
+   <button class="g text-xs py-1 px-2.5" onclick="duoPushWorkout(null,null,S()).then(()=>duoPoll(true))">🔄 Sincronizar</button>
+  </div>
+  <div class="rounded-xl bg-black/35 border border-white/10 p-2.5">
+   <div class="text-[10px] uppercase tracking-wider text-[#ffd166]">🎁 Aposta / Prémio da Semana</div>
+   <div class="flex gap-1.5 mt-1">
+    <input id="duoStakeInp" class="i text-xs" placeholder="Ex: Quem perder faz massagem / Se matarmos o Boss vamos jantar..." value="${esc(DUO.stake)}">
+    <button class="g text-xs px-3 shrink-0" onclick="duoSaveStake()">Guardar</button>
+   </div>
+  </div>
+  <div class="grid grid-cols-2 gap-2 text-center">
+   <div class="rounded-xl bg-black/30 border border-[#39ff88]/40 p-2.5">
+    <div class="text-xs text-zinc-300 font-bold">👤 ${esc(DUO.me)} (Tu)</div>
+    <div class="text-lg font-bold mt-0.5">Nv ${s.lv} <span class="text-xs font-normal text-zinc-400">· 🔥 ${s.stk}d</span></div>
+    <div class="text-xs text-[#ffd166] font-bold mt-1">⚖️ ${fm(my.rel)}× esforço</div>
+    <div class="text-[11px] text-zinc-400">${my.wkTrades} treinos · ${fx(my.wkVol)} kg${my.wkKm>0?` · 🏃 ${fm(my.wkKm)} km`:''}</div>
+   </div>
+   ${p?`<div class="rounded-xl bg-black/30 border border-[#38bdf8]/40 p-2.5">
+    <div class="text-xs text-[#38bdf8] font-bold">⚔️ ${esc(p.name)}</div>
+    <div class="text-lg font-bold mt-0.5">Nv ${p.lv} <span class="text-xs font-normal text-zinc-400">· 🔥 ${p.stk}d</span></div>
+    <div class="text-xs text-[#ffd166] font-bold mt-1">⚖️ ${fm(pRel)}× esforço</div>
+    <div class="text-[11px] text-zinc-400">${pTr} treinos · ${fx(pVol)} kg${pKm>0?` · 🏃 ${fm(pKm)} km`:''}</div>
+   </div>`:`<div class="rounded-xl bg-black/30 border border-white/10 p-2.5 flex items-center justify-center text-xs text-zinc-500">A aguardar sincronização do parceiro na sala "${esc(DUO.room)}"…</div>`}
+  </div>
+  <div class="space-y-1">
+   <div class="flex justify-between text-[11px]">
+    <span class="text-zinc-400">⚖️ <b>Cabo de Guerra</b> (Volume + Corrida ÷ Peso)</span>
+    <span class="text-[#ffd166] font-semibold">${leader==='Empate'?'⚡ Empate técnico!':'👑 '+esc(leader)+' lidera a semana!'}</span>
+   </div>
+   <div class="h-3.5 w-full rounded-full overflow-hidden flex bg-black/50 p-0.5 border border-white/15">
+    <div style="width:${myPct}%;background:linear-gradient(90deg,#16a34a,#39ff88);transition:width .5s" class="h-full rounded-l-full"></div>
+    <div style="width:${100-myPct}%;background:linear-gradient(90deg,#38bdf8,#0284c7);transition:width .5s" class="h-full rounded-r-full"></div>
+   </div>
+   <div class="flex justify-between text-[10px] text-zinc-400">
+    <span>${esc(DUO.me)}: ${myPct}% (${fm(my.rel)}×)</span>
+    <span>${esc(p?p.name:'Parceiro')}: ${100-myPct}% (${fm(pRel)}×)</span>
+   </div>
+  </div>
+  <div class="rounded-xl bg-black/40 border ${bossDead?'border-[#39ff88]':'border-[#ff4d6d]/45'} p-2.5 space-y-1.5">
+   <div class="flex justify-between items-center">
+    <b class="text-xs ${bossDead?'text-[#39ff88]':'text-[#ff8fa3]'}">${bossName} ${bossDead?'· DERROTADO! 🎉':'· Raid Cooperativa'}</b>
+    <span class="text-xs font-bold">${fx(bossHP)} / ${fx(bossMaxHP)} HP</span>
+   </div>
+   <div class="h-3 w-full bg-white/10 rounded-full overflow-hidden">
+    <div class="h-full transition-all duration-500" style="width:${bossPct}%;background:linear-gradient(90deg,#c9184a,#ff4d6d);box-shadow:0 0 10px #ff4d6d"></div>
+   </div>
+   <div class="flex justify-between items-center text-[11px] text-zinc-400">
+    <span>Dano conjunto: <b class="text-white">${fx(dmgTotal)}</b> (${esc(DUO.me)} ${fx(my.wkXP)} + ${esc(p?p.name:'Parceiro')} ${fx(pXP)})</span>
+    ${bossDead?(claimed?`<span class="text-[#39ff88] font-bold">✅ +200 XP recebidos</span>`:`<button class="b text-xs py-1 px-2.5 animate-bounce" onclick="duoClaimBoss(${my.wk})">🎁 Abrir Baú (+200 XP)</button>`):''}
+   </div>
+  </div>
+  <div class="space-y-1">
+   <div class="text-[10px] uppercase tracking-wider text-zinc-400">⚡ Enviar Alerta Instantâneo ao Parceiro</div>
+   <div class="grid grid-cols-3 gap-1.5">
+    <button class="g text-xs py-1.5 px-2 truncate" onclick="duoSendTaunt('fire')">🔥 Bora treinar!</button>
+    <button class="g text-xs py-1.5 px-2 truncate" onclick="duoSendTaunt('crown')">👑 Grande treino!</button>
+    <button class="g text-xs py-1.5 px-2 truncate" onclick="duoSendTaunt('eyes')">👀 Passei-te!</button>
+   </div>
+  </div>
+  ${DUO.feed.length?`<div class="space-y-1 pt-2 border-t border-white/10">
+   <div class="text-[10px] uppercase tracking-wider text-zinc-400">🔔 Mural de Atividade em Tempo Real</div>
+   ${DUO.feed.slice(0,6).map(e=>`<div class="text-xs flex justify-between items-center gap-2 py-1 border-b border-white/5">
+    <span class="truncate">${e.type==='taunt'||e.type==='boss'?esc(e.text):`<b class="${e.who===DUO.me?'text-zinc-300':'text-[#ffd166]'}">${e.who===DUO.me?'🏋️ Tu':'⚔️ '+esc(e.who)}</b> concluiu <b>${esc(e.day)}</b> (${e.km>0?'🏃 '+fm(e.km)+' km':fx(e.vol)+' kg'})${e.pr?' 🏅':''}`}</span>
+    <span class="text-[11px] text-zinc-400 shrink-0">${e.xp?'+'+fx(e.xp)+' XP · ':''}${fd(e.d||td())}</span>
+   </div>`).join('')}
+  </div>`:''}
+ </div>`;
 }
 
-/* Cartão de Configuração da Arena (aparece em 💾 Dados) */
-function vDuoCfg() {
-  return `<div class="c space-y-2" style="border-color:rgba(255,204,51,.4)">
-    <b class="text-[#ffd166]">⚔️ Arena de Casal (Ligação João &amp; Midina)</b>
-    <p class="text-xs text-zinc-400">Cola aqui o link do teu Firebase Realtime Database. Usa exatamente o mesmo link e a mesma sala nos dois telemóveis.</p>
-    <input id="duoUrl" class="i text-xs" placeholder="https://gym-rpg-casal-default-rtdb.europe-west1.firebasedatabase.app" value="${esc(DUO.url)}">
-    <div class="grid grid-cols-2 gap-2">
-      <input id="duoRoom" class="i text-xs" placeholder="Sala (ex: joao-midina)" value="${esc(DUO.room)}">
-      <input id="duoMe" class="i text-xs" placeholder="O teu nome" value="${esc(DUO.me)}">
-    </div>
-    <div class="flex gap-2 flex-wrap">
-      <button class="b text-xs" onclick="saveDuoCfg()">Guardar e Sincronizar</button>
-      ${'Notification' in window && Notification.permission !== 'granted' ? `<button class="g text-xs" onclick="Notification.requestPermission().then(()=>toast('Alertas ativados no telemóvel!'))">🔔 Ativar Notificações no Telemóvel</button>` : ''}
-    </div>
-  </div>`;
+function vDuoCfg(){
+ return`<div class="c space-y-2" style="border-color:rgba(255,204,51,.4)">
+  <b class="text-[#ffd166]">⚔️ Arena de Casal (Ligação João &amp; Midina)</b>
+  <p class="text-xs text-zinc-400">Cola aqui o link do teu Firebase Realtime Database. Usa exatamente o mesmo link e a mesma sala nos dois telemóveis.</p>
+  <input id="duoUrl" class="i text-xs" placeholder="https://gym-rpg-casal-default-rtdb.europe-west1.firebasedatabase.app" value="${esc(DUO.url)}">
+  <div class="grid grid-cols-2 gap-2">
+   <input id="duoRoom" class="i text-xs" placeholder="Sala (ex: joao-midina)" value="${esc(DUO.room)}">
+   <input id="duoMe" class="i text-xs" placeholder="O teu nome" value="${esc(DUO.me)}">
+  </div>
+  <div class="flex gap-2 flex-wrap">
+   <button class="b text-xs" onclick="saveDuoCfg()">Guardar e Sincronizar</button>
+   ${'Notification'in window&&Notification.permission!=='granted'?`<button class="g text-xs" onclick="Notification.requestPermission().then(()=>toast('Alertas ativados no telemóvel!'))">🔔 Ativar Notificações no Telemóvel</button>`:''}
+  </div>
+ </div>`;
 }
+
 function R(){if(ch){ch.destroy();ch=null}if(rch){rch.destroy();rch=null}
  syncBgMode();
  const al=hasNotifAlert();
