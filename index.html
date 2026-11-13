@@ -390,8 +390,7 @@ const vD0=()=>`<div class="c space-y-2"><b class="text-[#39ff88]">Backup e impor
  <input type="file" accept=".json,.csv,.txt" class="text-xs" onchange="fl(this)"></div>
  ${vAI()}<button class="g w-full text-red-300 mt-3" onclick="rz()">Apagar todos os dados</button>`;
 const out=t=>{$('#io').value=t;$('#io').select()};
-const xj=()=>out(JSON.stringify({v:6,p:D.p,ss:D.ss,cx:D.cx,pm:D.pm,px:D.px,wh:D.wh}));
-const xc=()=>out('data;dia;exercicio;peso;reps\n'+D.ss.flatMap(s=>s.ex.flatMap(e=>e.s.map(([w,r])=>[s.d,s.day,e.n,fm(w),r].join(';')))).join('\n'));
+const xj=()=>out(JSON.stringify({v:6,p:D.p,ss:D.ss,cx:D.cx,pm:D.pm,px:D.px,wh:D.wh,duo:D.duo}));const xc=()=>out('data;dia;exercicio;peso;reps\n'+D.ss.flatMap(s=>s.ex.flatMap(e=>e.s.map(([w,r])=>[s.d,s.day,e.n,fm(w),r].join(';')))).join('\n'));
 const cp=()=>{const t=$('#io');t.select();try{navigator.clipboard.writeText(t.value).catch(()=>document.execCommand('copy'))}catch(e){document.execCommand('copy')}toast('Copiado')};
 const fl=i=>{const r=new FileReader();r.onload=()=>imp(r.result);r.readAsText(i.files[0])};
 function imp(t){t=t.trim();const n0=D.ss.length;
@@ -480,8 +479,12 @@ const GC=(()=>{try{return JSON.parse(lsg('gymrpg-g-cfg'))||{}}catch(e){return{}}
 function dh(){return JSON.stringify(D,(k,v)=>k=='ts'||k=='al'||k=='lv'||k=='bk'?undefined:v)}
 function saveLocal(){lss(KEY,JSON.stringify(D))}
 function setSt(st,msg){CL.st=st;CL.msg=msg||'';if(V=='d'||V=='h')R()}
-function replaceD(o){Object.keys(D).forEach(k=>delete D[k]);Object.assign(D,{p:{},ss:[],cx:{},u:{}},o);srt();wInit();CL.h=dh();saveLocal()}
-function mergeSS(a,b){const k=s=>s.d+'|'+s.day,h=new Set(a.map(k));return a.concat(b.filter(s=>!h.has(k(s))))}
+function replaceD(o){
+  Object.keys(D).forEach(k=>delete D[k]);
+  Object.assign(D,{p:{},ss:[],cx:{},u:{}},o);
+  if(D.duo&&D.duo.url){DUO=Object.assign(DUO,D.duo);localStorage.setItem(DUO_KEY,JSON.stringify(DUO))}
+  srt();wInit();CL.h=dh();saveLocal();
+}function mergeSS(a,b){const k=s=>s.d+'|'+s.day,h=new Set(a.map(k));return a.concat(b.filter(s=>!h.has(k(s))))}
 function applyRemote(rd,why){if(!(rd.ss||[]).length&&D.ss.length){CL.dirty=true;return}lss('gymrpg-backup-sync',JSON.stringify(D));replaceD(rd);chk();toast('☁️ '+why);if(V!='t'){R();onOpen()}}
 const EXP='Sessão Google expirada: toca em Reconectar.';
 async function gapi(u,o){if(!CL.tok||Date.now()>CL.exp){CL.tok='';setSt('expired');throw new Error(EXP)}o=o||{};o.headers=Object.assign({Authorization:'Bearer '+CL.tok},o.headers||{});const r=await fetch(u,o);if(r.status==401){CL.tok='';setSt('expired');throw new Error(EXP)}if(!r.ok){let m='';try{m=(await r.json()).error.message}catch(e){}throw new Error('Google Drive: '+(m||r.status))}return r}
@@ -797,39 +800,51 @@ function getMyWeekStats(s){
  return{wk,wkTrades:wkSS.length,wkVol,wkXP,wkKm,kg,rel};
 }
 
-async function duoPushWorkout(ns,g,s1,customEv){
- if(!DUO.url)return;
- const st=getMyWeekStats(s1);
- const payload={
-  name:DUO.me,lv:s1.lv,rank:s1.t,xp:Math.round(s1.xp),stk:s1.stk,
-  kg:st.kg,wk:st.wk,wkTrades:st.wkTrades,wkVol:st.wkVol,wkKm:st.wkKm,wkXP:st.wkXP,rel:st.rel,
-  ts:Date.now()
- };
- let ev=customEv||null;
- if(!ev&&ns&&g){
-  let rKm=0,rMin=0;
-  (ns.ex||[]).forEach(e=>{
-   const n=nz(e.n);
-   if(n==='corrida'||n==='corrida continua'||n==='cooper'){
-    (e.s||[]).forEach(([w,r])=>{rKm+=(n==='cooper'?(+w||0)/1000:(+w||0));rMin+=(+r||0)});
-   }
-  });
-  ev={
-   type:'workout',who:DUO.me,day:ns.day,d:ns.d,
-   vol:Math.round(g.v),xp:Math.round(g.x),km:Math.round(rKm*10)/10,min:Math.round(rMin),
-   pr:!!g.pr,lv:s1.lv,ts:Date.now()
+async function duoPushWorkout(ns, g, s1, customEv) {
+  if (!DUO.url) return;
+  const st = getMyWeekStats(s1);
+  const payload = {
+    name: DUO.me, lv: s1.lv, rank: s1.t, xp: Math.round(s1.xp), stk: s1.stk,
+    kg: st.kg, wk: st.wk, wkTrades: st.wkTrades, wkVol: st.wkVol, wkXP: st.wkXP, wkKm: st.wkKm, rel: st.rel,
+    ts: Date.now()
   };
- }
- try{
-  const base=`${DUO.url}/rooms/${DUO.room}`;
-  await fetch(`${base}/players/${encodeURIComponent(DUO.me)}.json`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-  await fetch(`${base}/history/${st.wk}/${encodeURIComponent(DUO.me)}.json`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({rel:st.rel,xp:st.wkXP,vol:st.wkVol,km:st.wkKm})});
-  if(ev){
-   await fetch(`${base}/events/${ev.ts}.json`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(ev)});
-  }
- }catch(e){}
-}
 
+  let ev = customEv || null;
+  if (!ev && ns && g) {
+    let rKm = 0, rMin = 0;
+    (ns.ex || []).forEach(e => {
+      const n = nz(e.n);
+      if (n === 'corrida' || n === 'corrida continua' || n === 'cooper') {
+        (e.s || []).forEach(([w, r]) => { rKm += (n === 'cooper' ? (+w || 0) / 1000 : (+w || 0)); rMin += (+r || 0); });
+      }
+    });
+    ev = {
+      type: 'workout', who: DUO.me, day: ns.day, d: ns.d,
+      vol: Math.round(g.v), xp: Math.round(g.x), km: Math.round(rKm * 10) / 10, min: Math.round(rMin),
+      pr: !!g.pr, lv: s1.lv, ts: Date.now()
+    };
+  }
+
+  try {
+    const base = `${DUO.url}/rooms/${DUO.room}`;
+    await fetch(`${base}/players/${encodeURIComponent(DUO.me)}.json`, {
+      method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload)
+    });
+    await fetch(`${base}/history/${st.wk}/${encodeURIComponent(DUO.me)}.json`, {
+      method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ rel: st.rel, xp: st.wkXP, vol: st.wkVol, km: st.wkKm })
+    });
+    if (ev) {
+      await fetch(`${base}/events/${ev.ts}.json`, {
+        method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(ev)
+      });
+      if (DUO.feed && DUO.feed.length >= 20) {
+        DUO.feed.slice(19).forEach(old => {
+          if (old && old.ts) fetch(`${base}/events/${old.ts}.json`, { method: 'DELETE' }).catch(()=>{});
+        });
+      }
+    }
+  } catch (e) {}
+}
 async function duoSendTaunt(kind){
  if(!DUO.url)return toast('Configura primeiro a Arena em Dados!');
  const msgs={
@@ -861,6 +876,7 @@ async function duoClaimBoss(wk) {
   DUO.claims = DUO.claims || {};
   DUO.claims[claimKey] = true;
   localStorage.setItem(DUO_KEY, JSON.stringify(DUO));
+  D.duo = { url: DUO.url, room: DUO.room, me: DUO.me };
   save();
 
   const bIdx = Math.abs(wk) % BOSSES.length;
