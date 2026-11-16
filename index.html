@@ -137,22 +137,51 @@ function S(){
  const run=a=>{let t=0,c=0;a.forEach((k,i)=>{c=i&&k==a[i-1]+1?c+1:1;t=Math.max(t,c)});return t};
  return{b,h,pb,xpd,fs,qw:QW[wkn(T)],vol,mv,ms,xp,lv,sx,LOG,atr,gl,last,lastD:last==null?null:dstr(last),stk,wkc,mult:stk>=1,n:D.ss.length,wk:run(f(W,3)),mo:run(f(M,4)),yr:ds.length?Math.floor((Math.max(...ds)-Math.min(...ds))/315576e5):0,full:Object.values(Y).some(x=>x.size>=5),t:rank(lv)}}
 
-/* Conquistas */
-const B=[],TH=[40,60,80,100,140,180,220],RK=['Iniciado','Aprendiz','Resistente','Centurião','Titã','Colosso','Deus do Ferro'];
-Object.keys(L).forEach((k,ki)=>TH.forEach((t,i)=>B.push({id:k+t,c:'Força Bruta',i:IC[ki],n:RK[i]+' · '+L[k],d:`1RM de ${t} kg em ${L[k]}`,f:s=>s.b[k]>=t})));
-[[10,'10 Toneladas'],[50,'50 Toneladas'],[100,'Centena de Ferro'],[500,'500 Toneladas'],[1e3,'Liga de Ferro'],[1e4,'Aço Infinito'],[1e6,'Megatonelada']].forEach(([t,n])=>B.push({id:'v'+t,c:'Volume e Dedicação',i:'🏋️',n,d:`${t.toLocaleString('pt-PT')} t levantadas no total`,f:s=>s.vol/1e3>=t}));
+/* ===== 4. NOVAS CONQUISTAS DE ELITE EXPANDIDAS ===== */
+const B=[];
+const TH_ELITE=[20,35,50,65,85,110,140];
+Object.keys(L).forEach((k,ki)=>TH_ELITE.forEach((t,i)=>B.push({id:k+t,c:'Força Bruta',i:IC[ki],n:RK2[i]?RK2[i][1]+' · '+L[k]:'Elite · '+L[k],d:'1RM de ' + t + ' kg em ' + L[k],f:s=>s.b[k]>=t})));
+
+[
+ ['Triad de Ferro','Supino + Agachamento + Deadlift somam 350 kg de 1RM',s=>s.b.sup+s.b.agach+s.b.dead>=350],
+ ['Triad Lendária','Os 3 grandes somam 450 kg de 1RM',s=>s.b.sup+s.b.agach+s.b.dead>=450],
+ ['Agachamento 2×','Agachamento de 2× o teu peso corporal',s=>D.p.kg&&s.b.agach>=2.0*D.p.kg],
+ ['Deadlift 2,5×','Deadlift de 2,5× o teu peso corporal',s=>D.p.kg&&s.b.dead>=2.5*D.p.kg],
+ ['Supino 1,5×','Supino de 1,5× o teu peso corporal',s=>D.p.kg&&s.b.sup>=1.5*D.p.kg],
+ ['Elevação Pélvica 2×','Elevação Pélvica de 2× o peso corporal',s=>D.p.kg&&s.b.hip>=2.0*D.p.kg]
+].forEach(([n,d,f],i)=>B.push({id:'ex_ratio_'+i,c:'Força Bruta',i:'🛡️',n,d,f}));
+
+[
+ [1e3,'1.000 Toneladas','1.000 t levantadas no total'],
+ [2500,'2.500 Toneladas','2.500 t levantadas no total'],
+ [5000,'5.000 Toneladas','5.000 t levantadas no total'],
+ [10000,'10.000 Toneladas','10.000 t levantadas no total']
+].forEach(([t,n,d])=>B.push({id:'vol_'+t,c:'Volume e Dedicação',i:'🚛',n,d,f:s=>s.vol/1e3>=t}));
+
+[
+ ['Sessão Monstro','7,5 toneladas numa só sessão',s=>s.mv>=7500],
+ ['Sessão Titânica','10 toneladas numa só sessão',s=>s.mv>=10000]
+].forEach(([n,d,f],i)=>B.push({id:'mv_'+i,c:'Volume e Dedicação',i:'⚡',n,d,f}));
+
 [1,10,50,100,250,500,1000].forEach(t=>B.push({id:'s'+t,c:'Volume e Dedicação',i:'🎖️',n:t+(t>1?' Treinos':' Treino'),d:t+' treinos registados',f:s=>s.n>=t}));
 [2,4,8,12,26,52].forEach(t=>B.push({id:'w'+t,c:'Consistência Temporal',i:'🔥',n:t+' Semanas de Fogo',d:t+' semanas seguidas com 3+ treinos',f:s=>s.wk>=t}));
-[1,3,6,12,24].forEach(t=>B.push({id:'m'+t,c:'Consistência Temporal',i:'📅',n:t+(t>1?' Meses':' Mês')+' Imparável',d:t+' meses seguidos com 4+ treinos',f:s=>s.mo>=t}));
-[1,2,3,5].forEach(t=>B.push({id:'y'+t,c:'Consistência Temporal',i:'⏳',n:t+(t>1?' Anos':' Ano')+' de Lenda',d:t+(t>1?' anos':' ano')+' de treino ativo',f:s=>s.yr>=t}));
-[['Trio de Aço','Supino + Agachamento + Deadlift somam 500 kg de 1RM',s=>s.b.sup+s.b.agach+s.b.dead>=500],
-['Totalista de Elite','Os 3 grandes somam 700 kg de 1RM',s=>s.b.sup+s.b.agach+s.b.dead>=700],
-['Supino 1,5×','Supino de 1,5× o peso corporal',s=>D.p.kg&&s.b.sup>=1.5*D.p.kg],
-['Agachamento 2×','Agachamento de 2× o peso corporal',s=>D.p.kg&&s.b.agach>=2*D.p.kg],
-['Deadlift 2,5×','Deadlift de 2,5× o peso corporal',s=>D.p.kg&&s.b.dead>=2.5*D.p.kg],
-['Sessão Titânica','10 toneladas numa só sessão',s=>s.mv>=1e4],
-['Semana Completa','5 dias de treino diferentes na mesma semana',s=>s.full],
-['Maratona de Ferro','30 séries numa só sessão',s=>s.ms>=30]].forEach(([n,d,f],i)=>B.push({id:'x'+i,c:'Segredos',i:'🗝️',n,d,f,x:1}));
+[30,60,100].forEach(t=>B.push({id:'stk_days_'+t,c:'Consistência Temporal',i:'⏳',n:t+' Dias de Streak',d:'Streak ativo de ' + t + ' dias seguidos',f:s=>s.stk>=t}));
+
+[
+ [50,'50 km de Corrida','50 km acumulados em corrida'],
+ [100,'100 km de Corrida','100 km acumulados em corrida'],
+ [500,'500 km de Corrida','500 km acumulados em corrida'],
+ [1000,'1.000 km de Corrida','1.000 km acumulados em corrida']
+].forEach(([km,n,d])=>B.push({id:'run_'+km,c:'Cardio & Corrida',i:'🏃',n,d,f:s=>{
+  let tot=0; D.ss.forEach(x=>(x.ex||[]).forEach(e=>{const n=nz(e.n);if(n==='corrida'||n==='corrida continua'||n==='cooper')(e.s||[]).forEach(([w])=>{tot+=(n==='cooper'?(+w||0)/1000:(+w||0))})}));
+  return tot>=km;
+}}));
+
+[
+ ['Raid Master','Derrotar o Boss Semanal 5 vezes',s=>Object.keys(DUO.claims||{}).length>=5],
+ ['Duelo de Titãs','Vencer o Cabo de Guerra semanal 5 vezes',s=>Object.values(DUO.hist||{}).filter(obj=>{const rm=obj['João']?(+obj['João'].rel||0):0;const rp=Object.entries(obj).find(([k])=>k!=='João');const rpV=rp?(+rp[1].rel||0):0;return rm>rpV}).length>=5]
+].forEach(([n,d,f],i)=>B.push({id:'coop_'+i,c:'Arena de Casal',i:'⚔️',n,d,f}));
+
 function chk(){const s=S(),nw=[];B.forEach(b=>{if(!D.u[b.id]&&b.f(s)){D.u[b.id]=td();nw.push(b)}});return nw}
 const nb=nw=>nw.length>3?toast('🏆 '+nw.length+' novas conquistas!'):nw.forEach(b=>toast('🏆 '+b.n));
 
@@ -171,7 +200,7 @@ function av(v,b,m){
  const hd=P(lb(100,44,6.5+2*m,100,62,8+3*m,0),K)+`<ellipse cx="100" cy="30" rx="12.5" ry="15.5" fill="${K}"/>`;
  return`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 330" width="200" height="330"><defs><linearGradient id="sk"><stop offset="0" stop-color="#dba478"/><stop offset=".55" stop-color="#c58a5f"/><stop offset="1" stop-color="#7a4a31"/></linearGradient><radialGradient id="gl"><stop offset="0" stop-color="#10b981" stop-opacity=".28"/><stop offset="1" stop-color="#10b981" stop-opacity="0"/></radialGradient></defs><circle cx="100" cy="170" r="140" fill="url(#gl)"/><ellipse cx="100" cy="327" rx="64" ry="5" fill="#10b981" fill-opacity=".3"/><g id="r">${r}</g><use href="#r" transform="translate(200 0) scale(-1 1)"/>${ct}${hd}</svg>`}
 const fb=v=>'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(av(v=='frente'?'f':'b',bf(),mf(S())));
-const asrc=(v,lv)=>{const k=stg(lv)[0];return IM[k+'|'+v]||((typeof avatarStages!=='undefined'&&avatarStages[k])||{})[v]||fb(v)};
+const asrc=(v,lv)=>{const k=stg(lv)[0];return IM[k+'|'+v]||((typeof avatarVideos!=='undefined'&&avatarVideos[k])||{})[v]||fb(v)};
 
 const IDB=(()=>{let p;const op=()=>p=p||new Promise((ok,ko)=>{try{const r=indexedDB.open('gymrpg-media',1);r.onupgradeneeded=()=>r.result.createObjectStore('m');r.onsuccess=()=>ok(r.result);r.onerror=()=>ko(r.error)}catch(e){ko(e)}});
  const tx=(md,f)=>op().then(db=>new Promise((ok,ko)=>{const t=db.transaction('m',md),q=f(t.objectStore('m'));t.oncomplete=()=>ok(q&&q.result);t.onerror=t.onabort=()=>ko(t.error)}));
@@ -238,45 +267,69 @@ function drawRadar(){
  });
 }
 
-/* Cartão de Corrida (Km Mensais e Anuais) */
+/* ===== 2. CORRIDA · MÊS E ANOS (Com seletor de modo e navegação) ===== */
 const MES=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-var runOff = 0; // 0 = mês atual, -1 = mês passado, etc.
+var runOff = 0, runMode = 'm'; // runMode: 'm' (mês) ou 'y' (anos)
 function vRunKm(){
  const d = new Date(); d.setDate(1); d.setMonth(d.getMonth() + runOff);
  const yr = String(d.getFullYear()), mIdx = d.getMonth(), ym = `${yr}-${String(mIdx+1).padStart(2,'0')}`;
- let mKm=0, yKm=0, mMin=0, yMin=0, mCnt=0, yCnt=0;
+ let mKm=0, yKm=0, aKm=0, mMin=0, yMin=0, aMin=0, mCnt=0, yCnt=0, aCnt=0;
  D.ss.forEach(s=>{if(!s.d)return;let sk=0,sm=0;
   (s.ex||[]).forEach(e=>{const n=nz(e.n);
    if(n==='corrida'||n==='corrida continua'||n==='cooper'){
     (e.s||[]).forEach(([w,r])=>{const k=n==='cooper'?((+w||0)/1000):(+w||0);if(k>0){sk+=k;sm+=(+r||0)}})}
   });
-  if(sk>0){if(s.d.slice(0,4)===yr){yKm+=sk;yMin+=sm;yCnt++}if(s.d.slice(0,7)===ym){mKm+=sk;mMin+=sm;mCnt++}}
+  if(sk>0){
+   aKm+=sk; aMin+=sm; aCnt++;
+   if(s.d.slice(0,4)===yr){yKm+=sk;yMin+=sm;yCnt++}
+   if(s.d.slice(0,7)===ym){mKm+=sk;mMin+=sm;mCnt++}
+  }
  });
  const pace=(k,m)=>k>0&&m>0?`${Math.floor(m/k)}'${String(Math.round(((m/k)%1)*60)).padStart(2,'0')}"/km`:'—';
  const mesNome=MES[mIdx]||'Mês';
+ 
  return`<div class="c">
   <div class="flex justify-between items-center mb-2 gap-1">
-   <b class="text-[#38bdf8] text-sm">🏃 Corrida · Km</b>
+   <div class="flex items-center gap-1.5">
+    <b class="text-[#38bdf8] text-sm">🏃 Corrida</b>
+    <button class="text-[10px] px-2 py-0.5 rounded ${runMode==='m'?'b':'g'}" onclick="runMode='m';R()">Mês</button>
+    <button class="text-[10px] px-2 py-0.5 rounded ${runMode==='y'?'b':'g'}" onclick="runMode='y';R()">Anos</button>
+   </div>
    <div class="flex items-center gap-1">
-    <button class="g text-xs py-1 px-2.5" onclick="runOff--;R()">◀</button>
-    <span class="text-xs font-bold text-[#e8f6ff] min-w-[95px] text-center">${mesNome.slice(0,3)} ${yr}${runOff===0?' · atual':''}</span>
-    <button class="g text-xs py-1 px-2.5" ${runOff>=0?'disabled style="opacity:.3"':''} onclick="runOff++;R()">▶</button>
+    <button class="g text-xs py-1 px-2" onclick="runOff--;R()">◀</button>
+    <span class="text-xs font-bold text-[#e8f6ff] min-w-[75px] text-center">${runMode==='m'?mesNome.slice(0,3)+' '+yr:yr}${runOff===0?' · atual':''}</span>
+    <button class="g text-xs py-1 px-2" ${runOff>=0?'disabled style="opacity:.3"':''} onclick="runOff++;R()">▶</button>
     ${runOff!==0?`<button class="b text-[10px] py-1 px-2" onclick="runOff=0;R()">Hoje</button>`:''}
    </div>
   </div>
+  ${runMode==='m'?`
   <div class="grid grid-cols-2 gap-2 text-center">
    <div class="rounded-xl bg-black/30 border border-white/10 p-2.5">
     <div class="text-[10px] uppercase tracking-wider text-zinc-400">📅 ${mesNome} ${yr}</div>
     <div class="text-2xl font-bold text-[#38bdf8] mt-0.5">${fm(mKm)} <span class="text-xs font-normal">km</span></div>
-    <div class="text-[11px] text-zinc-400 mt-0.5">${mCnt} ${mCnt===1?'corrida':'corridas'} · ritmo ${pace(mKm,mMin)}</div>
+    <div class="text-[11px] text-zinc-400 mt-0.5">${mCnt} corridas · ${pace(mKm,mMin)}</div>
    </div>
    <div class="rounded-xl bg-black/30 border border-white/10 p-2.5">
     <div class="text-[10px] uppercase tracking-wider text-zinc-400">🏆 Total Ano (${yr})</div>
     <div class="text-2xl font-bold text-[#7dd3fc] mt-0.5">${fm(yKm)} <span class="text-xs font-normal">km</span></div>
-    <div class="text-[11px] text-zinc-400 mt-0.5">${yCnt} ${yCnt===1?'corrida':'corridas'} · ${Math.round(yMin)} min</div>
+    <div class="text-[11px] text-zinc-400 mt-0.5">${yCnt} corridas · ${Math.round(yMin)} min</div>
    </div>
-  </div></div>`;
+  </div>`:`
+  <div class="grid grid-cols-2 gap-2 text-center">
+   <div class="rounded-xl bg-black/30 border border-white/10 p-2.5">
+    <div class="text-[10px] uppercase tracking-wider text-zinc-400">🏆 Acumulado Ano (${yr})</div>
+    <div class="text-2xl font-bold text-[#38bdf8] mt-0.5">${fm(yKm)} <span class="text-xs font-normal">km</span></div>
+    <div class="text-[11px] text-zinc-400 mt-0.5">${yCnt} corridas · ritmo ${pace(yKm,yMin)}</div>
+   </div>
+   <div class="rounded-xl bg-black/30 border border-white/10 p-2.5">
+    <div class="text-[10px] uppercase tracking-wider text-zinc-400">🌟 Total Histórico</div>
+    <div class="text-2xl font-bold text-[#7dd3fc] mt-0.5">${fm(aKm)} <span class="text-xs font-normal">km</span></div>
+    <div class="text-[11px] text-zinc-400 mt-0.5">${aCnt} corridas · ${Math.round(aMin)} min totais</div>
+   </div>
+  </div>`}
+ </div>`;
 }
+
 const DS=['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
 const quando=g=>g==0?'hoje':g==1?'ontem':g<0?'data futura':`há ${g} dias`;
 function vStk(s){const T=dnum(td()),m0=wkn(T)*7-3,set=new Set(D.ss.map(x=>dnum(x.d))),on=s.mult;
@@ -370,7 +423,7 @@ function fin(){const dr=draft[day]||{},ex=[];
  if(s1.stk>s0.stk)toast(`🔥 Streak: ${s1.stk} ${s1.stk==1?'dia':'dias'} — bónus de +5% ativo`);
  D.lv=s1.lv;save();nb(nw);R()}
 
-const vG0=()=>`<div class="flex gap-1">${[[90,'3 meses'],[365,'1 ano'],[0,'Tudo']].map(([r,n])=>`<button class="flex-1 py-2 rounded-lg ${rng==r?'b':'g'}" onclick="rng=${r};R()">${n}</button>`).join('')}</div>
+const vG0=()=>`<div class="flex gap-1">${[[90,'3 meses'],[365,'1 год'],[0,'Tudo']].map(([r,n])=>`<button class="flex-1 py-2 rounded-lg ${rng==r?'b':'g'}" onclick="rng=${r};R()">${n}</button>`).join('')}</div>
  <div class="c"><div class="text-sm text-zinc-400 mb-2">Curva de 1RM por sessão (kg)</div><div class="relative h-72">${D.ss.length?'<canvas id="cv"></canvas>':'<p class="text-zinc-500 text-sm">Guarda treinos ou importa o histórico para ver a evolução.</p>'}</div></div>`;
 function dc(){const cv=$('#cv');if(!cv)return;if(!window.Chart){cv.outerHTML='<p class="text-zinc-500 text-sm">Não foi possível carregar o Chart.js.</p>';return}
  const s=S(),col=['#39ff88','#38bdf8','#f5d90a','#ff6bd6'];let ds=[...new Set(Object.values(s.h).flatMap(o=>Object.keys(o)))].sort();
@@ -390,7 +443,8 @@ const vD0=()=>`<div class="c space-y-2"><b class="text-[#39ff88]">Backup e impor
  <input type="file" accept=".json,.csv,.txt" class="text-xs" onchange="fl(this)"></div>
  ${vAI()}<button class="g w-full text-red-300 mt-3" onclick="rz()">Apagar todos os dados</button>`;
 const out=t=>{$('#io').value=t;$('#io').select()};
-const xj=()=>out(JSON.stringify({v:6,p:D.p,ss:D.ss,cx:D.cx,pm:D.pm,px:D.px,wh:D.wh,duo:D.duo}));const xc=()=>out('data;dia;exercicio;peso;reps\n'+D.ss.flatMap(s=>s.ex.flatMap(e=>e.s.map(([w,r])=>[s.d,s.day,e.n,fm(w),r].join(';')))).join('\n'));
+const xj=()=>out(JSON.stringify({v:6,p:D.p,ss:D.ss,cx:D.cx,pm:D.pm,px:D.px,wh:D.wh,duo:D.duo}));
+const xc=()=>out('data;dia;exercicio;peso;reps\n'+D.ss.flatMap(s=>s.ex.flatMap(e=>e.s.map(([w,r])=>[s.d,s.day,e.n,fm(w),r].join(';')))).join('\n'));
 const cp=()=>{const t=$('#io');t.select();try{navigator.clipboard.writeText(t.value).catch(()=>document.execCommand('copy'))}catch(e){document.execCommand('copy')}toast('Copiado')};
 const fl=i=>{const r=new FileReader();r.onload=()=>imp(r.result);r.readAsText(i.files[0])};
 function imp(t){t=t.trim();const n0=D.ss.length;
@@ -448,7 +502,15 @@ const fmt=(e,z)=>{const c=cd(e.n);return c?c[2](z[0],z[1]):`${fm(z[0])} kg × ${
 const csvT=()=>'data;dia;exercicio;peso;reps\n'+D.ss.flatMap(s=>s.ex.flatMap(e=>e.s.map(([w,r])=>[s.d,s.day,e.n,fm(w),r].join(';')))).join('\n');
 const jsonT=()=>JSON.stringify({v:6,p:D.p,ss:D.ss,cx:D.cx,pm:D.pm,px:D.px,wh:D.wh},null,1);
 function dlf(n,t,m){try{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([t],{type:m+';charset=utf-8'}));a.download=n;document.body.append(a);a.click();a.remove();D.bk=Date.now();save();toast('Ficheiro '+n+' gerado')}catch(e){toast('Não deu para descarregar. Usa Dados → Exportar.')}}
-function hDel(i,b){if(hdi!=i){hdi=i;b.textContent='Toca outra vez para apagar';return}D.ss.splice(i,1);hdi=-1;D.lv=S().lv;save();toast('Treino apagado');R()}
+
+/* ===== 3. APAGAR TREINO E SINCRONIZAR ARENA ===== */
+function hDel(i,b){
+ if(hdi!=i){hdi=i;b.textContent='Toca outra vez para apagar';return}
+ D.ss.splice(i,1); hdi=-1; D.lv=S().lv; save();
+ duoPushWorkout(null, null, S()).then(()=>duoPoll(true));
+ toast('Treino apagado e Arena sincronizada'); R();
+}
+
 function vX(){const s=S(),T=dnum(td()),tv=D.ss.reduce((a,x)=>a+x.ex.reduce((b,e)=>b+volE(e,swt(x)),0),0),L=D.ss.map((x,i)=>[x,i]).filter(([x])=>!hf||x.day==hf).reverse();
  return`<div class="c"><b class="text-[#39ff88]">Treinos registados</b><div class="text-xs text-zinc-400 mt-1">${D.ss.length} treinos · volume total ${fx(tv)} kg${s.lastD?` · último ${fd(s.lastD)} (${quando(T-dnum(s.lastD))})`:''}</div>
  <div class="flex gap-2 mt-3 flex-wrap"><button class="g text-sm" onclick="dlf('treinos-gym-rpg.csv',csvT(),'text/csv')">⬇ Descarregar CSV</button><button class="g text-sm" onclick="dlf('treinos-gym-rpg.json',jsonT(),'application/json')">⬇ Descarregar JSON</button></div></div>
@@ -574,18 +636,23 @@ function dlSug(){if(dlAct()||!D.ss.length||(D.dls&&td()<=D.dls))return null;cons
 function dlBanner(){const T=dnum(td()),a=dlAct(),B='style="border-color:rgba(255,200,87,.45)"';
  if(a){const l=a[1]-T+1;return`<div class="c" ${B}><b class="text-[#ffd166]">🛌 Semana de descarga ativa</b><div class="text-xs text-zinc-300 mt-1">Até ${fd(dstr(a[1]))} (${l} ${l==1?'dia':'dias'}). Cerca de metade das séries e −12% de carga. A atrofia e o streak não contam nesta semana.</div><button class="g text-sm mt-3" onclick="dlEnd()">Terminar descarga</button></div>`}
  const g=dlSug();return g?`<div class="c" ${B}><b class="text-[#ffd166]">🛌 Semana de descarga sugerida</b><div class="text-xs text-zinc-300 mt-1">${esc(g)}. Durante 7 dias: cerca de metade das séries e −10 a 15% de carga.</div><div class="flex gap-2 mt-3"><button class="b text-sm" onclick="dlStart()">Iniciar descarga</button><button class="g text-sm" onclick="dlSnz()">Agora não</button></div></div>`:''}
+
+/* ===== 1. DESCARGA COM INDICAÇÃO EXATA DE SÉRIES ===== */
 const rnd=w=>Math.round(w*2)/2;
-function dlSugEx(e){const n=nz(e.n),c=cd(e.n),Z=e.s||[],N=Z.length;if(!N)return'';const h=Math.max(1,Math.ceil(N/2)),sr=h==1?'série':'séries',mx=i=>Math.max(...Z.map(z=>+z[i]||0)),G='<span class="text-zinc-500">';
- if(!c){const rs=Z.map(z=>+z[1]||0).sort((a,b)=>a-b);return`<b>${fm(rnd(mx(0)*.875))} kg</b> × ${rs[Math.floor(N/2)]} reps · ${h} ${sr} ${G}(antes: ${fm(mx(0))} kg, ${N} séries)</span>`}
- if(c===BW){const w=mx(0);return`<b>${Math.max(1,Math.round(mx(1)*.85))} reps</b>${w?` + ${fm(rnd(w*.875))} kg`:''} · ${h} ${sr} ${G}(antes: ${mx(1)} reps, ${N} séries)</span>`}
- const w=+Z[0][0]||0,r=+Z[0][1]||0,ct=['series 400m','sprints 100m','box jump','salto comprimento'].includes(n);
- return`<b>${ct?c[2](w,Math.max(1,Math.ceil(r/2))):c[2](w*.875,Math.round(r*.875))}</b> ${G}(antes: ${c[2](w,r)}) · ritmo leve</span>`}
+function dlSugEx(e){
+ const c=cd(e.n), Z=e.s||[], N=Z.length; if(!N)return'';
+ const h=Math.max(1,Math.ceil(N/2)), sr=h==1?'série':'séries', mx=i=>Math.max(...Z.map(z=>+z[i]||0)), G='<span class="text-zinc-500">';
+ if(!c){const rs=Z.map(z=>+z[1]||0).sort((a,b)=>a-b);return`<b>${fm(rnd(mx(0)*.875))} kg</b> × ${rs[Math.floor(N/2)]} reps · <b class="text-[#ffd166]">Fazer ${h} ${sr}</b> ${G}(antes: ${fm(mx(0))} kg, ${N} séries)</span>`}
+ if(c===BW){const w=mx(0);return`<b>${Math.max(1,Math.round(mx(1)*.85))} reps</b>${w?` + ${fm(rnd(w*.875))} kg`:''} · <b class="text-[#ffd166]">Fazer ${h} ${sr}</b> ${G}(antes: ${mx(1)} reps, ${N} séries)</span>`}
+ return`<b>ritmo leve</b> · <b class="text-[#ffd166]">Fazer ${h} ${sr}</b> ${G}(antes: ${c[2](+Z[0][0]||0,+Z[0][1]||0)})</span>`;
+}
+
 function dlCard(){if(!dlAct())return'';const W=dlWin(),inW=x=>{const n=dnum(x.d);return W.some(([a,b])=>n>=a&&n<=b)},L=D.ss.filter(x=>x.day==day&&!inW(x)).sort((a,b)=>a.d<b.d?-1:1).pop();
  return`<div class="c" style="border-color:rgba(255,200,87,.45)"><b class="text-[#ffd166]">🛌 Descarga · ${esc(day)}</b>${L?`<div class="text-xs text-zinc-400 mt-1">Com base no último treino (${fd(L.d)}):</div>${L.ex.map(e=>`<div class="mt-2 text-sm"><b>${esc(e.n)}</b><div class="text-xs text-[#e8fff1]">${dlSugEx(e)}</div></div>`).join('')}`:'<div class="text-xs text-zinc-400 mt-1">Ainda não tens um treino registado neste dia.</div>'}</div>`}
 var RV={m:'w',o:0};
 function rvRange(){const T=dnum(td());if(RV.m=='w'){const a=wkn(T)*7-3+RV.o*7;return[a,a+6]}const t=new Date();t.setDate(1);t.setMonth(t.getMonth()+RV.o);const y=t.getFullYear(),m=t.getMonth(),n=new Date(y,m+1,1),p=v=>String(v).padStart(2,'0');return[dnum(`${y}-${p(m+1)}-01`),dnum(`${n.getFullYear()}-${p(n.getMonth()+1)}-01`)-1]}
 function vR(){const s=S(),[a,b]=rvRange(),len=b-a+1,inR=(x,lo,hi)=>{const n=dnum(x.d);return n>=lo&&n<=hi},ss=D.ss.filter(x=>inR(x,a,b)),ps=D.ss.filter(x=>inR(x,a-len,a-1)),vol=L=>L.reduce((t,x)=>t+x.ex.reduce((u,e)=>u+volE(e,swt(x)),0),0),v=vol(ss),pv=vol(ps),days=new Set(ss.map(x=>x.d)).size,xp=ss.reduce((t,x)=>t+((s.sx.get(x)||{}).x||0),0),
- best=(L,k)=>{let m=0;L.forEach(x=>x.ex.forEach(e=>{if(mk(e.n)==k)e.s.forEach(([w,r])=>{if(r<=10)m=Math.max(m,rm(w,r))})}));return m},before=D.ss.filter(x=>dnum(x.d)<a),LN={sup:'Supino',agach:'Agachamento',dead:'Deadlift',hip:'Hip Thrust'},
+ best=(L,k)=>{let m=0;L.forEach(x=>x.ex.forEach(e=>{if(mk(e.n)==k)e.s.forEach(([w,r])=>{if(r<=10)m=Math.max(m,rm(w,r))})}));return m},before=D.ss.filter(x=>dnum(x.d)<a),LN={sup:'Supino',agach:'Agachamento',dead:'Deadlift',hip:'Hip Trust'},
  recs=Object.keys(LN).map(k=>[k,best(before,k),best(ss,k)]).filter(([k,p,q])=>p>0&&q>p*1.0001),T=dnum(td()),w0=wAt(dstr(a)),w1=wAt(dstr(Math.min(b,T))),dl=dlWin().some(([x,y])=>x<=b&&y>=a),dv=pv?Math.round((v-pv)/pv*100):null,
  ev={};ss.forEach(x=>x.ex.forEach(e=>{ev[e.n]=(ev[e.n]||0)+volE(e,swt(x))}));const top=Object.entries(ev).sort((p,q)=>q[1]-p[1])[0],
  tl=(t,val,sub)=>`<div class="rounded-xl border border-white/10 p-3 bg-black/20"><div class="text-xs text-zinc-400">${t}</div><div class="text-xl font-semibold text-[#39ff88]">${val}</div><div class="text-xs text-zinc-500">${sub||'&nbsp;'}</div></div>`,
@@ -885,7 +952,6 @@ async function duoClaimBoss(wk) {
     await fetch(`${base}/claims/${wk}_${encodeURIComponent(DUO.me)}.json`, {
       method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(true)
     });
-    // Verifica se o escalão já subiu nesta semana; se não, fortalece o próximo Boss!
     const upRes = await fetch(`${base}/meta/lastBossUpWk.json`);
     const lastUpWk = await upRes.json();
     if (lastUpWk !== wk) {
