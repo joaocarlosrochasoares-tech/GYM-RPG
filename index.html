@@ -179,18 +179,82 @@ const IDB=(()=>{let p;const op=()=>p=p||new Promise((ok,ko)=>{try{const r=indexe
 const VU={},VX=new Set,VBAD=new Set;
 const b64u=(b,t)=>{const s=atob(b),a=new Uint8Array(s.length);for(let i=0;i<s.length;i++)a[i]=s.charCodeAt(i);return URL.createObjectURL(new Blob([a],{type:t}))};
 const hasV=k=>!VBAD.has(k)&&(VX.has(k)||(avatarVideos[k]===EMB?(typeof VEMB!=='undefined'&&!!VEMB[k]):!!avatarVideos[k]));
-async function vsrc(k){if(k in VU)return VU[k];let u=null;
- if(VX.has(k))try{const x=await IDB.get(k+'|video');if(x)u=typeof x=='string'?x:URL.createObjectURL(x)}catch(e){}
- if(!u){const a=avatarVideos[k];u=a===EMB?((typeof VEMB!=='undefined'&&VEMB[k])?b64u(VEMB[k],'video/mp4'):null):a||null}
- return VU[k]=u}
-function vis(){const v=$('#iV');if(!v)return;const hv=hasV(CK),f=face=='video'&&!hv?'frente':face;
- $('#iF').style.opacity=f=='frente'?1:0;$('#iB').style.opacity=f=='costas'?1:0;v.style.opacity=f=='video'?1:0;
- if(f=='video')v.play().catch(()=>{});else v.pause();
- [['btnV','video'],['btnF','frente'],['btnC','costas']].forEach(([id,x])=>{const b=$('#'+id);b.className=(f==x?'b':'g')+' flex-1 text-sm tracking-wide';if(id=='btnV')b.style.display=hv?'':'none'})}
-function ap(){const l=S().lv,k=CK=stg(l)[0],v=$('#iV');
- [['frente','#iF'],['costas','#iB']].forEach(([w,q])=>{const i=$(q);i.onerror=()=>{i.onerror=null;i.src=fb(w)};i.src=asrc(w,l)});
- v.muted=true;v.poster=asrc('frente',l);v.onerror=()=>{if(v.getAttribute('src')){VBAD.add(k);vis()}};vis();
- if(hasV(k))vsrc(k).then(u=>{if($('#iV')!==v||CK!==k)return;if(!u){VBAD.add(k);return vis()}if(v.getAttribute('src')!==u)v.src=u;if(face=='video')v.play().catch(()=>{})})}
+async function vsrc(k){
+ if(k in VU) return VU[k];
+ let u = null;
+ if(VX.has(k)) {
+  try {
+   const x = await IDB.get(k+'|video');
+   if(x) u = typeof x == 'string' ? x : URL.createObjectURL(x);
+  } catch(e){}
+ }
+ if(!u){
+  const a = avatarVideos[k];
+  u = a === EMB ? ((typeof VEMB !== 'undefined' && VEMB[k]) ? b64u(VEMB[k],'video/mp4') : null) : a || null;
+ }
+ return VU[k] = u;
+}
+
+function vis(){
+ const v = $('#iV'); if(!v) return;
+ const hv = hasV(CK);
+ const f = (face === 'video' && !hv) ? 'frente' : face;
+ 
+ const elF = $('#iF'); const elB = $('#iB');
+ if(elF) elF.style.opacity = (f === 'frente') ? '1' : '0';
+ if(elB) elB.style.opacity = (f === 'costas') ? '1' : '0';
+ if(v) v.style.opacity = (f === 'video') ? '1' : '0';
+
+ if(f === 'video') {
+  v.play().catch(() => {});
+ } else {
+  v.pause();
+ }
+
+ [['btnV','video'],['btnF','frente'],['btnC','costas']].forEach(([id,x])=>{
+  const b = $('#'+id);
+  if(b) {
+   b.className = (f === x ? 'b' : 'g') + ' flex-1 text-sm tracking-wide';
+   if(id === 'btnV') b.style.display = hv ? '' : 'none';
+  }
+ });
+}
+
+function ap(){
+ const sObj = S();
+ if(!sObj) return;
+ const l = sObj.lv, k = CK = stg(l)[0], v = $('#iV');
+ 
+ [['frente','#iF'],['costas','#iB']].forEach(([w,q])=>{
+  const i = $(q);
+  if(i) {
+   i.onerror = () => { i.onerror = null; i.src = fb(w); };
+   i.src = asrc(w, l);
+  }
+ });
+
+ if(v) {
+  v.muted = true;
+  v.poster = asrc('frente', l);
+  v.onerror = () => { VBAD.add(k); vis(); };
+ }
+ 
+ vis();
+
+ if(hasV(k)) {
+  vsrc(k).then(u => {
+   if($('#iV') !== v || CK !== k) return;
+   if(!u) { VBAD.add(k); vis(); return; }
+   if(v.getAttribute('src') !== u) {
+    v.src = u;
+    v.load(); // Força o browser a carregar o novo vídeo sem conflitos
+   }
+   if(face === 'video') {
+    v.play().catch(() => {});
+   }
+  });
+ }
+}
 const tf=x=>{face=x;vis()};
 const IMS=()=>{try{localStorage.setItem('gymrpg-img',JSON.stringify(IM));return 1}catch(e){return 0}};
 const fn=l=>RK2.findIndex(x=>x[0]==l)+1;
