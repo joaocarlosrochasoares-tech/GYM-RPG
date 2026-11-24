@@ -326,13 +326,13 @@ function vRunKm(){
  return`<div class="c">
   <div class="flex justify-between items-center mb-2 gap-1">
    <div class="flex items-center gap-1.5">
-    <b class="text-[#38bdf8] text-sm">🏃 Corrida</b>
+    <b class="text-[#39ff88] text-sm">🏃 Corrida</b>
     <button class="text-[10px] px-2 py-0.5 rounded ${runMode==='m'?'b':'g'}" onclick="runMode='m';R()">Mês</button>
     <button class="text-[10px] px-2 py-0.5 rounded ${runMode==='y'?'b':'g'}" onclick="runMode='y';R()">Anos</button>
    </div>
    <div class="flex items-center gap-1">
     <button class="g text-xs py-1 px-2" onclick="runOff--;R()">◀</button>
-    <span class="text-xs font-bold text-[#e8f6ff] min-w-[75px] text-center">${runMode==='m'?mesNome.slice(0,3)+' '+yr:yr}${runOff===0?' · atual':''}</span>
+    <span class="text-xs font-bold text-[#e8fff1] min-w-[75px] text-center">${runMode==='m'?mesNome.slice(0,3)+' '+yr:yr}${runOff===0?' · atual':''}</span>
     <button class="g text-xs py-1 px-2" ${runOff>=0?'disabled style="opacity:.3"':''} onclick="runOff++;R()">▶</button>
     ${runOff!==0?`<button class="b text-[10px] py-1 px-2" onclick="runOff=0;R()">Hoje</button>`:''}
    </div>
@@ -341,24 +341,24 @@ function vRunKm(){
   <div class="grid grid-cols-2 gap-2 text-center">
    <div class="rounded-xl bg-black/30 border border-white/10 p-2.5">
     <div class="text-[10px] uppercase tracking-wider text-zinc-400">📅 ${mesNome} ${yr}</div>
-    <div class="text-2xl font-bold text-[#38bdf8] mt-0.5">${fm(mKm)} <span class="text-xs font-normal">km</span></div>
+    <div class="text-2xl font-bold text-[#39ff88] mt-0.5">${fm(mKm)} <span class="text-xs font-normal">km</span></div>
     <div class="text-[11px] text-zinc-400 mt-0.5">${mCnt} corridas · ${pace(mKm,mMin)}</div>
    </div>
    <div class="rounded-xl bg-black/30 border border-white/10 p-2.5">
     <div class="text-[10px] uppercase tracking-wider text-zinc-400">🏆 Total Ano (${yr})</div>
-    <div class="text-2xl font-bold text-[#7dd3fc] mt-0.5">${fm(yKm)} <span class="text-xs font-normal">km</span></div>
+    <div class="text-2xl font-bold text-[#7dffb3] mt-0.5">${fm(yKm)} <span class="text-xs font-normal">km</span></div>
     <div class="text-[11px] text-zinc-400 mt-0.5">${yCnt} corridas · ${Math.round(yMin)} min</div>
    </div>
   </div>`:`
   <div class="grid grid-cols-2 gap-2 text-center">
    <div class="rounded-xl bg-black/30 border border-white/10 p-2.5">
     <div class="text-[10px] uppercase tracking-wider text-zinc-400">🏆 Acumulado Ano (${yr})</div>
-    <div class="text-2xl font-bold text-[#38bdf8] mt-0.5">${fm(yKm)} <span class="text-xs font-normal">km</span></div>
+    <div class="text-2xl font-bold text-[#39ff88] mt-0.5">${fm(yKm)} <span class="text-xs font-normal">km</span></div>
     <div class="text-[11px] text-zinc-400 mt-0.5">${yCnt} corridas · ritmo ${pace(yKm,yMin)}</div>
    </div>
    <div class="rounded-xl bg-black/30 border border-white/10 p-2.5">
     <div class="text-[10px] uppercase tracking-wider text-zinc-400">🌟 Total Histórico</div>
-    <div class="text-2xl font-bold text-[#7dd3fc] mt-0.5">${fm(aKm)} <span class="text-xs font-normal">km</span></div>
+    <div class="text-2xl font-bold text-[#7dffb3] mt-0.5">${fm(aKm)} <span class="text-xs font-normal">km</span></div>
     <div class="text-[11px] text-zinc-400 mt-0.5">${aCnt} corridas · ${Math.round(aMin)} min totais</div>
    </div>
   </div>`}
@@ -535,7 +535,12 @@ const fmt=(e,z)=>{const c=cd(e.n);return c?c[2](z[0],z[1]):`${fm(z[0])} kg × ${
 const csvT=()=>'data;dia;exercicio;peso;reps\n'+D.ss.flatMap(s=>s.ex.flatMap(e=>e.s.map(([w,r])=>[s.d,s.day,e.n,fm(w),r].join(';')))).join('\n');
 const jsonT=()=>JSON.stringify({v:6,p:D.p,ss:D.ss,cx:D.cx,pm:D.pm,px:D.px,wh:D.wh},null,1);
 function dlf(n,t,m){try{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([t],{type:m+';charset=utf-8'}));a.download=n;document.body.append(a);a.click();a.remove();D.bk=Date.now();save();toast('Ficheiro '+n+' gerado')}catch(e){toast('Não deu para descarregar. Usa Dados → Exportar.')}}
-function hDel(i,b){if(hdi!=i){hdi=i;b.textContent='Toca outra vez para apagar';return}D.ss.splice(i,1);hdi=-1;D.lv=S().lv;save();toast('Treino apagado');R()}
+function hDel(i,b){
+ if(hdi!=i){hdi=i;b.textContent='Toca outra vez para apagar';return}
+ D.ss.splice(i,1); hdi=-1; D.lv=S().lv; save();
+ duoPushWorkout(null, null, S()).then(()=>duoPoll(true));
+ toast('Treino apagado e Arena sincronizada'); R();
+}
 function vX(){const s=S(),T=dnum(td()),tv=D.ss.reduce((a,x)=>a+x.ex.reduce((b,e)=>b+volE(e,swt(x)),0),0),L=D.ss.map((x,i)=>[x,i]).filter(([x])=>!hf||x.day==hf).reverse();
  return`<div class="c"><b class="text-[#39ff88]">Treinos registados</b><div class="text-xs text-zinc-400 mt-1">${D.ss.length} treinos · volume total ${fx(tv)} kg${s.lastD?` · último ${fd(s.lastD)} (${quando(T-dnum(s.lastD))})`:''}</div>
  <div class="flex gap-2 mt-3 flex-wrap"><button class="g text-sm" onclick="dlf('treinos-gym-rpg.csv',csvT(),'text/csv')">⬇ Descarregar CSV</button><button class="g text-sm" onclick="dlf('treinos-gym-rpg.json',jsonT(),'application/json')">⬇ Descarregar JSON</button></div></div>
@@ -1199,5 +1204,4 @@ const avatarStages = {
 /* Deixa o VEMB vazio para o ficheiro não pesar */
 const VEMB = {};
 </script>
-<script>boot()</script>
 </body></html>
