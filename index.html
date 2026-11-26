@@ -1130,11 +1130,20 @@ function getBetData() {
   return { text: String(DUO.stake), proposedBy: '', status: 'negotiating', lastMsg: {} };
 }
 
-function saveBetData(b) {
+async function saveBetData(b) {
   DUO.stake = JSON.stringify(b);
   localStorage.setItem(DUO_KEY, JSON.stringify(DUO));
-  duoPushWorkout(null, null, S()).then(() => duoPoll(true));
   R();
+  if (DUO.url) {
+    try {
+      await fetch(`${DUO.url}/rooms/${DUO.room}/meta/stake.json`, {
+        method: 'PUT',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(DUO.stake)
+      });
+    } catch (e) {}
+  }
+  duoPoll(true);
 }
 
 function betPropose() {
