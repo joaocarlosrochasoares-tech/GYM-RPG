@@ -76,6 +76,16 @@ const pn=s=>{const x=parseFloat(String(s).replace(',','.'));return isFinite(x)?x
 const fm=x=>String(Math.round(x*10)/10).replace('.',',');
 const rm=(w,r)=>r<1?0:w/(1.0278-.0278*Math.min(r,30));
 const BW=['lastro kg (opcional)','reps',(w,r)=>`${r} reps${w?` +${fm(w)} kg`:''}`];
+const BW_PCT={
+ 'barras':1,
+ 'tracao':1,
+ 'flexoes diamante':0.75,
+ 'flexoes 2min/1min':0.70,
+ 'flexoes':0.70,
+ 'prancha':0.65,
+ 'abdominais 1min/1min':0.50,
+ 'abdominais':0.50
+};
 const CD={
  'corrida':['km','minutos',(w,r)=>`${fm(w)} km em ${r} min`],
  'saltar corda':['minutos','saltos',(w,r)=>`${fm(w)} min · ${r} saltos`],
@@ -87,7 +97,7 @@ const CD={
  'cooper':['metros','minutos',(w,r)=>`${fm(w)} m em ${r} min`],
  'marcha':['km','minutos',(w,r)=>`${fm(w)} km em ${r} min`],
  'prancha':['—','segundos',(w,r)=>`${r} s`],
- 'barras':BW,'flexoes diamante':BW,'abdominais 1min/1min':BW,'flexoes 2min/1min':BW
+ 'barras':BW,'tracao':BW,'flexoes diamante':BW,'abdominais 1min/1min':BW,'flexoes 2min/1min':BW
 };
 const cd=n=>CD[nz(n)],car=n=>{const c=cd(n);return!!c&&c!==BW};
 const td=()=>new Date(Date.now()-new Date().getTimezoneOffset()*6e4).toISOString().slice(0,10);
@@ -100,8 +110,25 @@ const XP_DIV=10;
 const ATR_DIAS=7,ATR_XP=0;
 const STK_META=4,STK_GAP=3,STK_MULT=1.05;
 const DAY=864e5,dnum=d=>Math.round(Date.parse(d)/DAY),wkn=n=>Math.floor((n+3)/7),dstr=n=>new Date(n*DAY).toISOString().slice(0,10);
-function volE(e,kg){const c=cd(e.n);if(c&&c!==BW)return 0;const bw=c===BW?(+kg||+D.p.kg||0):0;return e.s.reduce((a,[w,r])=>a+(bw+(+w||0))*(+r||0),0)}
-
+function volE(e,kg){
+ const n=nz(e.n),c=cd(e.n),pKg=+kg||+D.p.kg||0;
+ if(n==='prancha'){
+  return e.s.reduce((a,[w,r])=>a+(pKg*0.65+(+w||0))*((+r||0)/6),0);
+ }
+ if(n==='box jump'){
+  return e.s.reduce((a,[w,r])=>a+pKg*((+w||0)/50)*(+r||0),0);
+ }
+ if(n==='salto comprimento'){
+  return e.s.reduce((a,[w,r])=>{const raw=+w||0,cm=raw>20?raw:raw*100;return a+pKg*(cm/125)*(+r||0)},0);
+ }
+ if(n==='sprints 100m'){
+  return e.s.reduce((a,[w,r])=>{const sec=+w||0;return sec>0?a+pKg*(100/Math.max(9.5,sec))*(+r||0):a},0);
+ }
+ if(c&&c!==BW)return 0;
+ const pct=BW_PCT[n]??(c===BW?1:0);
+ const bw=pct>0?pKg*pct:0;
+ return e.s.reduce((a,[w,r])=>a+(bw+(+w||0))*(+r||0),0);
+}
 const XA=30,XP2=2.8,XM=100,fx=n=>Math.round(n).toLocaleString('pt-PT'),CXP=L=>XA*(L-1)**XP2,LV=x=>Math.min(XM,Math.floor((x/XA)**(1/XP2)+1e-9)+1),TXP={100:100,150:150,200:250,250:400,300:600};
 
 const PD=['Dia1.2','Dia 2.1','Dia 3.1','Dia 4.1'];
@@ -468,7 +495,16 @@ function vT(){const dr=draft[day]=draft[day]||{},baseLen=(PL[day]||[]).length;
 function pmul(){const t={d:($('#dt')&&$('#dt').value)||dv||td(),day,ex:[]};D.ss.push(t);let m=1;try{const r=S().sx.get(t);m=r?r.m:1}finally{D.ss.pop()}return m}
 function upd(){const el=$('#sumv');if(!el)return;let T=0,X=0;const kg=+D.p.kg||0,dr=draft[day]||{};
  EX(day).forEach((n,i)=>{const e={n,s:(dr[n]||[]).map(([w,r])=>[pn(w),Math.round(pn(r))]).filter(([,r])=>r>0)},v=volE(e),o=$('#vo'+i);T+=v;X+=xpE(e,kg);
-  if(o&&!car(n))o.textContent=`Volume ${fx(v)} kg → ${fx(xpE(e,kg))} XP`+(cd(n)===BW?` · corpo ${fm(kg)} kg + lastro`:'')});
+  if(o){
+   if(!car(n)||v>0){
+    o.className='text-xs text-right text-[#7dffb3]';
+    const pct=BW_PCT[nz(n)];
+    o.textContent=`Volume ${fx(v)} kg → ${fx(xpE(e,kg))} XP`+(pct?` · ${Math.round(pct*100)}% corpo (${fm(kg*pct)} kg)`:'');
+   }else{
+    o.className='text-xs text-right text-zinc-500';
+    o.textContent='Cardio · XP pelas kcal estimadas';
+   }
+  }});
  const b=X,x=Math.round(b*pm0),on=pm0>1;
  el.innerHTML=`<div class="text-xs text-zinc-400 mb-2">Resumo · XP = Σ(Peso × Reps) ÷ 10</div><div class="grid grid-cols-3 gap-2 text-center">
   <div><div class="text-[10px] uppercase text-zinc-400">Volume</div><div class="font-bold">${fx(T)} kg</div></div>
@@ -589,9 +625,9 @@ function vX(){const s=S(),T=dnum(td()),tv=D.ss.reduce((a,x)=>a+x.ex.reduce((b,e)
   <button class="g w-full text-sm mt-4 text-red-300" onclick="hDel(${i},this)">Apagar treino</button></details>`}).join(''):'<div class="c text-sm text-zinc-500">Sem treinos registados neste filtro.</div>')}
 
 const LT={sup:2.25,agach:3,dead:3.5,hip:3.5};
-const MET={'corrida':[11,(w,r)=>r],'saltar corda':[11,(w,r)=>w],'series 400m':[11,(w,r)=>w*r/60],'corrida continua':[11,(w,r)=>r],'sprints 100m':[11,(w,r)=>w*r/60],'cooper':[11,(w,r)=>r],'marcha':[7,(w,r)=>r],'box jump':[8,(w,r)=>r/6],'salto comprimento':[8,(w,r)=>r/6],'prancha':[4,(w,r)=>r/60]};
+const MET={'corrida':[11,(w,r)=>r],'saltar corda':[11,(w,r)=>w],'series 400m':[11,(w,r)=>w*r/60],'corrida continua':[11,(w,r)=>r],'cooper':[11,(w,r)=>r],'marcha':[7,(w,r)=>r]};
 const MUL=n=>{n=nz(n);return/panturrilha|trapezio/.test(n)?.5:/mesa|leg ext|pull|abdu|pulley/.test(n)?.6:/lateral|rosca|tricep|bicep/.test(n)?.8:1};
-function xpE(e,kg){const c=cd(e.n);kg=+kg||+D.p.kg||0;if(c&&c!==BW){const m=MET[nz(e.n)];return m?e.s.reduce((a,[w,r])=>a+m[0]*kg*Math.max(0,m[1](+w||0,+r||0))/60/2,0):0}return volE(e,kg)/XP_DIV*MUL(e.n)}
+function xpE(e,kg){const c=cd(e.n);kg=+kg||+D.p.kg||0;const v=volE(e,kg);if(v>0)return v/XP_DIV*MUL(e.n);if(c&&c!==BW){const m=MET[nz(e.n)];return m?e.s.reduce((a,[w,r])=>a+m[0]*kg*Math.max(0,m[1](+w||0,+r||0))/60/2,0):0}return 0}
 const sd=()=>{try{localStorage.setItem('gymrpg-draft',JSON.stringify({draft,dv}))}catch(e){}};
 function bkChk(){if(!D.ss.length)return;if(!D.bk){D.bk=Date.now();save();return}if(Date.now()-D.bk>6048e5)setTimeout(()=>toast('💾 Mais de 7 dias sem backup: Histórico → Descarregar CSV/JSON.'),900)}
 function vMiss(s){const q=s.qw||{f:new Set,p:0,d:0},M=[['3 treinos de força (Dia1–4)',q.f.size>=3,q.f.size+'/3',150],['1 recorde pessoal',!!q.p,(q.p?1:0)+'/1',150],['Corrida / Dia 3.1 feito',!!q.d,(q.d?1:0)+'/1',100]];
