@@ -56,7 +56,7 @@ body{background:#04120b;color:#e8fff1;font-family:'Chakra Petch',system-ui,sans-
 .tug-side-l,.tug-side-r{position:absolute;top:0;bottom:0;transition:width .65s cubic-bezier(.22,1,.36,1)}
 .tug-side-l{left:0;background:linear-gradient(90deg,rgba(16,185,129,.22),var(--me-col,#39ff88))}
 .tug-side-r{right:0;background:linear-gradient(270deg,rgba(14,165,233,.22),var(--rv-col,#38bdf8))}
-.tug-clash-wrap{position:absolute;top:0;bottom:0;z-index:4;transform:translateX(-50%);transition:left .65s cubic-bezier(.22,1,.36,1);pointer-events:none}
+.tug-fighter{position:absolute;bottom:2px;width:78px;height:78px;mix-blend-mode:screen;object-fit:contain;filter:contrast(1.18) brightness(1.08);animation:tugPush .45s infinite ease-in-out alternate}
 .tug-wall{position:absolute;top:0;bottom:0;left:50%;width:4px;transform:translateX(-50%);background:#fff;box-shadow:0 0 12px #fff,0 0 24px #fde047,0 0 36px var(--me-col,#39ff88);animation:tugWallJitter .18s infinite alternate}
 @keyframes tugWallJitter{0%{opacity:.88;transform:translateX(-50%) scaleY(1)}100%{opacity:1;transform:translateX(-50%) scaleY(1.03)}}
 .tug-fighter{position:absolute;bottom:2px;width:78px;height:78px;mix-blend-mode:screen;object-fit:contain;filter:contrast(1.18) brightness(1.08);animation:tugPush .45s infinite ease-in-out alternate}
