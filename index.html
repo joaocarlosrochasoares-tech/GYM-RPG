@@ -1786,30 +1786,42 @@ function loadFighterMedia(vidId, imgId, basePath, fallbackPhoto, mirror){
   if(!vid || !img) return;
   vid.classList.toggle('mirror', !!mirror);
   img.classList.toggle('mirror', !!mirror);
-  const candidates = [
-    { type:'vid', src: basePath + '.mp4' },
-    { type:'img', src: basePath + '.webp' },
-    { type:'img', src: basePath + '.jpg' },
-    { type:'img', src: basePath + '.png' },
-    { type:'img', src: fallbackPhoto }
-  ];
-  let i = 0;
-  function tryNext(){
-    if(i >= candidates.length) return;
-    const c = candidates[i++];
-    if(c.type === 'vid'){
-      vid.onerror = tryNext;
-      vid.onloadeddata = () => { img.style.display='none'; vid.style.display='block'; vid.play().catch(()=>{}); };
-      vid.src = c.src; vid.load();
+  vid.style.display = 'none';
+  img.style.display = 'block';
+  img.src = fallbackPhoto || '';
+
+  const exts = ['.mp4', '.webp', '.jpg', '.png'];
+  let idx = 0;
+  function tryFile(){
+    if(idx >= exts.length) return;
+    const ext = exts[idx++];
+    const url = basePath + ext;
+    if(ext === '.mp4'){
+      const testV = document.createElement('video');
+      testV.muted = true;
+      testV.playsInline = true;
+      testV.onloadeddata = () => {
+        img.style.display = 'none';
+        vid.src = url;
+        vid.style.display = 'block';
+        vid.play().catch(()=>{});
+      };
+      testV.onerror = tryFile;
+      testV.src = url;
+      testV.load();
     } else {
-      img.onerror = tryNext;
-      img.onload = () => { vid.style.display='none'; img.style.display='block'; };
-      img.src = c.src;
+      const testI = new Image();
+      testI.onload = () => {
+        vid.style.display = 'none';
+        img.style.display = 'block';
+        img.src = url;
+      };
+      testI.onerror = tryFile;
+      testI.src = url;
     }
   }
-  tryNext();
+  tryFile();
 }
-
 function stopBossCanvas(){
   if(_bossAnimId){ cancelAnimationFrame(_bossAnimId); _bossAnimId = null; }
 }
