@@ -1784,43 +1784,51 @@ function loadFighterMedia(vidId, imgId, basePath, fallbackPhoto, mirror){
   const vid = document.getElementById(vidId);
   const img = document.getElementById(imgId);
   if(!vid || !img) return;
+
   vid.classList.toggle('mirror', !!mirror);
   img.classList.toggle('mirror', !!mirror);
+
+  // Mostra logo a foto de fallback enquanto verifica o vídeo/foto tug_*
   vid.style.display = 'none';
   img.style.display = 'block';
   img.src = fallbackPhoto || '';
 
-  const exts = ['.mp4', '.webp', '.jpg', '.png'];
-  let idx = 0;
-  function tryFile(){
-    if(idx >= exts.length) return;
-    const ext = exts[idx++];
-    const url = basePath + ext;
-    if(ext === '.mp4'){
-      const testV = document.createElement('video');
-      testV.muted = true;
-      testV.playsInline = true;
-      testV.onloadeddata = () => {
+  const candidates = [
+    { type:'vid', src: basePath + '.mp4' },
+    { type:'img', src: basePath + '.webp' },
+    { type:'img', src: basePath + '.jpg' },
+    { type:'img', src: basePath + '.png' }
+  ];
+
+  let i = 0;
+  function tryNext(){
+    if(i >= candidates.length) return;
+    const c = candidates[i++];
+    if(c.type === 'vid'){
+      const probe = document.createElement('video');
+      probe.muted = true;
+      probe.playsInline = true;
+      probe.onloadeddata = () => {
         img.style.display = 'none';
-        vid.src = url;
+        vid.src = c.src;
         vid.style.display = 'block';
         vid.play().catch(()=>{});
       };
-      testV.onerror = tryFile;
-      testV.src = url;
-      testV.load();
+      probe.onerror = tryNext;
+      probe.src = c.src;
+      probe.load();
     } else {
-      const testI = new Image();
-      testI.onload = () => {
+      const probe = new Image();
+      probe.onload = () => {
         vid.style.display = 'none';
+        img.src = c.src;
         img.style.display = 'block';
-        img.src = url;
       };
-      testI.onerror = tryFile;
-      testI.src = url;
+      probe.onerror = tryNext;
+      probe.src = c.src;
     }
   }
-  tryFile();
+  tryNext();
 }
 function stopBossCanvas(){
   if(_bossAnimId){ cancelAnimationFrame(_bossAnimId); _bossAnimId = null; }
@@ -1936,7 +1944,7 @@ function vArena(){
       <button class="ar-taunt-btn" onclick="duoSendTaunt('eyes')">👀 Passei-te!</button>
     </div>
 
-    ${renderWeeklyBetCard(weekEnded, leader, p ? p.name : '')}
+    ${typeof renderWeeklyBetCard === 'function' ? renderWeeklyBetCard(weekEnded, leader, p ? p.name : '') : ''}
 
     <div class="ar-subtabs">
       <button id="arSubTrophy" class="ar-subtab ${_arenaSub==='trophy'?'on':''}" onclick="setArenaSub('trophy')">🏆 Mural de Troféus</button>
@@ -1954,7 +1962,6 @@ function vArena(){
     </div>
   </div>`;
 }
-
 function mountArena(){
   if(!DUO.url) return;
   const s = S(), my = getMyWeekStats(s), p = DUO.peer;
