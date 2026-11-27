@@ -54,9 +54,8 @@ body{background:#04120b;color:#e8fff1;font-family:'Chakra Petch',system-ui,sans-
 .tug-arena{position:relative;height:88px;border-radius:14px;overflow:hidden;background:#020617;border:1px solid rgba(255,255,255,.14)}
 .tug-grid{position:absolute;inset:0;pointer-events:none;opacity:.22;background-image:linear-gradient(rgba(255,255,255,.15) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.15) 1px,transparent 1px);background-size:18px 18px}
 .tug-side-l,.tug-side-r{position:absolute;top:0;bottom:0;transition:width .65s cubic-bezier(.22,1,.36,1)}
-.tug-side-l{left:0;background:linear-gradient(90deg,rgba(16,185,129,.22),var(--me-col,#39ff88))}
-.tug-side-r{right:0;background:linear-gradient(270deg,rgba(14,165,233,.22),var(--rv-col,#38bdf8))}
-.tug-clash-wrap{position:absolute!important;top:0!important;bottom:0!important;width:4px!important;margin-left:-2px!important;transition:left .65s cubic-bezier(.22,1,.36,1);pointer-events:none}
+.tug-side-l{left:0;background:linear-gradient(90deg,rgba(16,185,129,.12),rgba(57,255,136,.32));border-bottom:3px solid var(--me-col,#39ff88)}
+.tug-side-r{right:0;background:linear-gradient(270deg,rgba(14,165,233,.12),rgba(56,189,248,.32));border-bottom:3px solid var(--rv-col,#38bdf8)}.tug-clash-wrap{position:absolute!important;top:0!important;bottom:0!important;width:4px!important;margin-left:-2px!important;transition:left .65s cubic-bezier(.22,1,.36,1);pointer-events:none}
 .tug-wall{position:absolute!important;top:0!important;bottom:0!important;left:0!important;width:4px!important;background:#fff;box-shadow:0 0 12px #fff,0 0 24px #fde047,0 0 36px var(--me-col,#39ff88);animation:tugWallJitter .18s infinite alternate}
 .tug-fighter{position:absolute!important;bottom:0!important;width:125px!important;height:86px!important;max-width:none!important;mix-blend-mode:screen!important;object-fit:contain;filter:contrast(1.25) brightness(1.1);animation:tugPush .45s infinite ease-in-out alternate}
 .tug-fighter.left{right:2px!important;left:auto!important;object-position:right bottom}
